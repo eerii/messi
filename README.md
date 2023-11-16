@@ -70,4 +70,14 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
         - [ ] Notificación de usuarios en línea
         - [ ] Notificación de mensajes nuevos
 
+## Organización
+
+Los bloques generales son:
+
+- Conexion cliente-servidor (descubrimiento de usarios)
+- Conexion cliente-cliente (mensajes)
+- Base de datos (registro, grupos)
+- Interfaz gráfica
+- Otras funciones (registro, solicitudes, ...)
+
 
