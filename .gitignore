@@ -14,3 +14,11 @@ gradlew.bat
 .settings
 .idea
 .vscode
+
+node_modules
+generated
+
+*.ts
+tsconfig.json
+package.json
+package-lock.json

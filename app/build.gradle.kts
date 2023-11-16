@@ -8,21 +8,29 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+
+    id("com.vaadin") version "24.2.3"
+    id("org.springframework.boot") version "3.0.2"
+    id("io.spring.dependency-management") version "1.0.15.RELEASE"
 }
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    maven(url = "https://maven.vaadin.com/vaadin-prereleases")
+    maven(url = "https://maven.vaadin.com/vaadin-addons")
 }
 
 dependencies {
-    // Use JUnit Jupiter for testing.
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
-
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
     // This dependency is used by the application.
     implementation("com.google.guava:guava:32.1.1-jre")
+
+    // Vaadin
+    implementation(enforcedPlatform("com.vaadin:vaadin-bom:24.2.3"))
+    implementation("com.vaadin:vaadin-core")
+
+    implementation("com.vaadin:vaadin-spring-boot-starter")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -37,7 +45,8 @@ application {
     mainClass.set(project.findProperty("app").toString())
 }
 
-tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
+defaultTasks("build")
+
+vaadin {
+
 }
