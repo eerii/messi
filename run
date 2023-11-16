@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ "$1" == "cliente" ]; then
+    echo "Cliente: gradlew run -Papp=cliente.App ${@:2}"
+    ./gradlew --console plain -q run -Papp=cliente.App "${@:2}"
+elif [ "$1" == "servidor" ]; then
+    echo "Servidor: gradlew run -Papp=servidor.App ${@:2}"
+    ./gradlew --console plain -q run -Papp=servidor.App "${@:2}"
+else
+    echo "Usage: $0 cliente|servidor [other args]"
+    exit 1
+fi
