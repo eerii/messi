@@ -1,6 +1,6 @@
 # messi
 
-## descripción
+## Descripción
 
 Se pide diseñar una aplicación distribuida que implemente un sistema de mensajería instantánea mediante java RMI. El servidor aceptará conexiones de múltiples clientes y, cada vez que se conecte uno nuevo, éste deberá realizar diversas acciones. En primer lugar deberá notificar al resto de clientes conectados que hay un nuevo cliente. Por otro lado, deberá informar al recién conectado de los clientes que en ese momento se encuentren en línea. De la misma forma, cuando un cliente se desconecte, se deberá de informar al resto de ese hecho.
 
@@ -21,3 +21,53 @@ Se sobreentiende que el cliente debe de tener una interfaz gráfica con una func
 Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria del título de ingeniería informática no solo se permite sino que se recomienda encarecidamente la realización de esta práctica en grupos de dos personas
 
 - TR2 - Personales: Trabajo en equipo. Trabajo en un equipo multidisciplinar y multilingüe. Habilidades en las relaciones interpersonales. Razonamiento crítico. Compromiso ético
+
+## Tareas
+- Sistema de mensajería instantánea mediante java RMI
+  - Servidor:
+    - [ ] Admite conexiones de múltiples clientes.
+    - Cada vez que se conecte un nuevo cliente:
+      - [ ] Notificar al resto de clientes que hay uno nuevo
+      - [ ] Notificar al recien conectado del resto de clientes conectados.
+      - [ ] Cuando se desconecte, notificar al resto la desconexión.
+  - Cliente:
+    - [ ] Mecanismo envío/recepción de mensajes.
+      - NUNCA pasarán por el servidor.
+      - Conexión cliente-cliente.
+  - Opcional:
+    - [ ] Grupos Gestionar grupos de amistad.
+      - [ ] Cada usuario dispone de un grupo de amigos.
+        - [ ] Mecanismo de registro de usuarios
+        - [ ] Solicitud de amistad
+          - [ ] Solo si se conoce el nombre del otro usuario
+          - [ ] El otro usuario debe aceptar para que se complete
+            - En ningún caso se notifica si el otro usuario rechaza tu amistad.
+          - [ ] El servidor almacena solicitudes a usuarios desconectados
+      - [ ] Las notificaciones de conexión/desconexión solo se producen entre amigos.
+      - [ ] Los grupos de amistad son distintos entre usuarios
+      - [ ] El concepto de amistad es biyectivo (si A es amigo de B, B lo es de A)
+  - Valoración de la práctica:
+    - 5 puntos:
+      - [ ] Un servidor aceptando conexiones de múltiples clientes.
+      - [ ] Todos los clientes son amigos entre sí.
+      - [ ] No hay clave de acceso entre los clientes.
+    - 2,5 puntos:
+      - [ ] Un servidor aceptando conexiones de múltiples clientes.
+      - [ ] Hay grupos de amigos definidos de forma estática.
+      - [ ] La clave de acceso al sistema deberá poder ser modificada por el cliente.
+    - 2,5 puntos:
+      - [ ] Un servidor aceptaando conexiones de múltiples clientes.
+      - [ ] Hay grupos de amigos definidos de forma dinámica.
+        - [ ] Base de datos para usuarios/lista de sus amigos/ clave acceso.
+      - [ ] Mecanismo de registro en la BD de nuevos usuarios.
+        - [ ] Pide el nombre de usuario/contraseña únicamente.
+      - [ ] Mecanismo para añadir un nuevo amigo.
+        - El usuario conoce el nombre de usuario del otro amigo
+    - Transversal:
+      - [ ] Interfaz gráfica del usuario
+        - [ ] Pestaña de registro
+        - [ ] Múltiples pestañas para los usuarios
+        - [ ] Notificación de usuarios en línea
+        - [ ] Notificación de mensajes nuevos
+
+
