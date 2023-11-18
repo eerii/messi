@@ -5,8 +5,9 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 import cliente.ICliente;
 import static utils.Utils.*;
@@ -16,11 +17,11 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     int puerto;
     String ip;
 
-    Set<ICliente> conexiones;
+    Map<ICliente, String> conexiones;
 
     protected ServidorImpl(int puerto) throws RemoteException {
         super();
-        conexiones = new HashSet<>();
+        conexiones = new HashMap<>();
 
         // Obtenemos la ip
         try {
@@ -42,46 +43,71 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
 
     @Override
     public void conectar(ICliente c) throws RemoteException {
-        if (conexiones.contains(c))
-            throw new RemoteException("la conexion " + c.str() + " ya existe");
+        comprobar_cliente(c);
+        if (conexiones.containsKey(c))
+            throw new RemoteException("la conexion " + conexiones.get(c) + " ya existe");
 
         // Notificar al resto de clientes
-        for (ICliente cc : conexiones) {
-            cc.notificar(EventoConexion.CLIENTE_CONECTADO, c);
+        for (ICliente cc : conexiones.keySet()) {
+            try {
+                cc.notificar(EventoConexion.CLIENTE_CONECTADO, c);
+            } catch (RemoteException e) {
+                eliminar_cliente(cc);
+            }
         }
 
         // Notificar al nuevo cliente de la lista de usuarios
-        c.notificar(EventoConexion.LISTA_CLIENTES, conexiones);
+        c.notificar(EventoConexion.LISTA_CLIENTES, new HashSet<>(conexiones.keySet()));
 
         // Añadir la conexión
-        conexiones.add(c);
+        conexiones.put(c, c.str());
         log(c.str() + " se ha conectado");
     }
 
     @Override
     public void salir(ICliente c) throws RemoteException {
-        if (!conexiones.contains(c))
-            throw new RemoteException("la conexion " + c.str() + " no existe");
+        if (!conexiones.containsKey(c))
+            throw new RemoteException("la conexion " + conexiones.get(c) + " no existe");
 
-        // Eliminar la conexión
-        conexiones.remove(c);
-        log(c.str() + " se ha desconectado");
-
-        // Notificar al resto de clientes
-        for (ICliente cc : conexiones) {
-            cc.notificar(EventoConexion.CLIENTE_DESCONECTADO, c);
-        }
+        eliminar_cliente(c);
     }
 
     @Override
     public boolean ping(ICliente c) throws RemoteException {
-        log("ping de " + c.str());
-        c.notificar(EventoConexion.PING, this);
+        log("ping de " + conexiones.get(c));
         return true;
     }
 
     @Override
     public String str() throws RemoteException {
         return "S" + ip + ":" + puerto;
+    }
+
+    void eliminar_cliente(ICliente c) {
+        // Eliminar la conexión
+        if (conexiones.containsKey(c)) {
+            log(conexiones.get(c) + " se ha desconectado");
+            conexiones.remove(c);
+        }
+
+        // Notificar al resto de clientes
+        for (ICliente cc : conexiones.keySet()) {
+            try {
+                cc.notificar(EventoConexion.CLIENTE_DESCONECTADO, c);
+            } catch (RemoteException e) {
+                eliminar_cliente(cc);
+            }
+        }
+    }
+
+    void comprobar_cliente(ICliente c) {
+        if (conexiones.containsKey(c)) {
+            log("comprobando " + conexiones.get(c));
+            try {
+                c.notificar(EventoConexion.PING, null);
+            } catch (RemoteException e) {
+                eliminar_cliente(c);
+            }
+        }
     }
 }

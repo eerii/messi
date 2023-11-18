@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,9 +17,11 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     int puerto;
     String ip;
     IServidor servidor;
+    Set<ICliente> clientes;
 
     protected ClienteImpl(int puerto_c, int puerto_s, String ip_s) throws RemoteException {
         super(puerto_c);
+        this.clientes = new HashSet<>();
 
         // Obtenemos la ip
         try {
@@ -39,26 +42,26 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         log("cliente conectado al servidor " + ip_s + ":" + puerto_s);
 
         servidor.ping(this);
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-        }
-
-        servidor.salir(this);
-        unexportObject(this, true);
-        System.exit(0);
     }
+
+    // Funciones de interfaz
 
     @Override
     public void notificar(EventoConexion e, Object o) throws RemoteException {
         switch (e) {
-            case CLIENTE_CONECTADO: // ICliente
-                log(((ICliente) o).str() + " se ha conectado");
+            case CLIENTE_CONECTADO: { // ICliente
+                ICliente c = (ICliente) o;
+                clientes.add(c);
+                log(c.str() + " se ha conectado");
                 break;
-            case CLIENTE_DESCONECTADO: // ICliente
-                log(((ICliente) o).str() + " se ha desconectado");
+            }
+            case CLIENTE_DESCONECTADO: { // ICliente
+                ICliente c = (ICliente) o;
+                clientes.remove(c);
+                log(c.str() + " se ha desconectado");
                 break;
-            case LISTA_CLIENTES: // Set<ICliente>
+            }
+            case LISTA_CLIENTES: { // Set<ICliente>
                 @SuppressWarnings("unchecked")
                 Set<ICliente> l = (Set<ICliente>) o;
 
@@ -73,12 +76,16 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                         }
                     }).collect(Collectors.toSet()));
                 break;
-            case PING: // IServidor/ICliente
-                if (o instanceof IServidor)
-                    log("ping de " + ((IServidor) o).str());
-                else if (o instanceof ICliente)
-                    log("ping de " + ((ICliente) o).str());
+            }
+            case PING: { // IServidor/ICliente
+                /*
+                 * if (o instanceof IServidor)
+                 * log("ping de " + ((IServidor) o).str());
+                 * else if (o instanceof ICliente)
+                 * log("ping de " + ((ICliente) o).str());
+                 */
                 break;
+            }
             default:
                 break;
         }
@@ -88,4 +95,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     public String str() throws RemoteException {
         return ip + ":" + puerto;
     }
+
+    // Funciones locales (para comunicación entre interfaz y api)
 }

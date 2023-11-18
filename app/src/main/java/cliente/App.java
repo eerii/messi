@@ -9,6 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class App {
+    static ClienteImpl cliente;
+
     public static void main(String[] args) {
         // Argumentos: (web) [puerto_cliente] [puerto_servidor] [ip_servidor]
         List<String> a = new ArrayList<>(Arrays.asList(args));
@@ -45,10 +47,14 @@ public class App {
 
         // Creamos el objeto cliente
         try {
-            new ClienteImpl(puerto_c, puerto_s, ip_s);
+            cliente = new ClienteImpl(puerto_c, puerto_s, ip_s);
         } catch (Exception e) {
             System.out.println("[C]: error iniciando cliente " + e.getMessage());
             System.exit(2);
         }
+    }
+
+    public static ClienteImpl get() {
+        return cliente;
     }
 }
