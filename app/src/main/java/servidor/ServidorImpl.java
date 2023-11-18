@@ -43,7 +43,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
 
     @Override
     public void conectar(ICliente c) throws RemoteException {
-        comprobar_cliente(c);
+        comprobarCliente(c);
         if (conexiones.containsKey(c))
             throw new RemoteException("la conexion " + conexiones.get(c) + " ya existe");
 
@@ -52,7 +52,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
             try {
                 cc.notificar(EventoConexion.CLIENTE_CONECTADO, c);
             } catch (RemoteException e) {
-                eliminar_cliente(cc);
+                eliminarCliente(cc);
             }
         }
 
@@ -69,7 +69,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         if (!conexiones.containsKey(c))
             throw new RemoteException("la conexion " + conexiones.get(c) + " no existe");
 
-        eliminar_cliente(c);
+        eliminarCliente(c);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         return "S" + ip + ":" + puerto;
     }
 
-    void eliminar_cliente(ICliente c) {
+    void eliminarCliente(ICliente c) {
         // Eliminar la conexión
         if (conexiones.containsKey(c)) {
             log(conexiones.get(c) + " se ha desconectado");
@@ -95,18 +95,18 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
             try {
                 cc.notificar(EventoConexion.CLIENTE_DESCONECTADO, c);
             } catch (RemoteException e) {
-                eliminar_cliente(cc);
+                eliminarCliente(cc);
             }
         }
     }
 
-    void comprobar_cliente(ICliente c) {
+    void comprobarCliente(ICliente c) {
         if (conexiones.containsKey(c)) {
             log("comprobando " + conexiones.get(c));
             try {
                 c.notificar(EventoConexion.PING, null);
             } catch (RemoteException e) {
-                eliminar_cliente(c);
+                eliminarCliente(c);
             }
         }
     }
