@@ -80,4 +80,4 @@ Los bloques generales son:
 - Interfaz gráfica
 - Otras funciones (registro, solicitudes, ...)
 
-
+IMPORTANTE: Arreglar callback de rmi y meter todo en el servidor (no codigo en app)
