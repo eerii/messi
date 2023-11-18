@@ -56,12 +56,12 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
             }
         }
 
-        // Notificar al nuevo cliente de la lista de usuarios
-        c.notificar(EventoConexion.LISTA_CLIENTES, new HashSet<>(conexiones.keySet()));
-
         // Añadir la conexión
         conexiones.put(c, c.str());
         log(c.str() + " se ha conectado");
+
+        // Notificar al nuevo cliente de la lista de usuarios
+        c.notificar(EventoConexion.LISTA_CLIENTES, new HashSet<>(conexiones.keySet()));
     }
 
     @Override
@@ -74,7 +74,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
 
     @Override
     public boolean ping(ICliente c) throws RemoteException {
-        log("ping de " + conexiones.get(c));
+        debug("ping de " + conexiones.get(c));
         return true;
     }
 

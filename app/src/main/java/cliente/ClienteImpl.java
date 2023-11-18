@@ -62,28 +62,29 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                 break;
             }
             case LISTA_CLIENTES: { // Set<ICliente>
-                @SuppressWarnings("unchecked")
-                Set<ICliente> l = (Set<ICliente>) o;
+                clientes = ((Set<ICliente>) o).stream()
+                        .filter(c -> c.hashCode() != this.hashCode())
+                        .collect(Collectors.toSet());
 
-                if (l.isEmpty())
+                if (clientes.isEmpty())
                     log("no hay clientes conectados");
                 else
-                    log("clientes conectados: " + l.stream().map(c -> {
-                        try {
-                            return c.str();
-                        } catch (RemoteException e1) {
-                            return "";
-                        }
-                    }).collect(Collectors.toSet()));
+                    log("clientes conectados: " + clientes.stream()
+                            .map(c -> {
+                                try {
+                                    return c.str();
+                                } catch (RemoteException e1) {
+                                    return "";
+                                }
+                            })
+                            .collect(Collectors.toSet()));
                 break;
             }
             case PING: { // IServidor/ICliente
-                /*
-                 * if (o instanceof IServidor)
-                 * log("ping de " + ((IServidor) o).str());
-                 * else if (o instanceof ICliente)
-                 * log("ping de " + ((ICliente) o).str());
-                 */
+                if (o instanceof IServidor)
+                    debug("ping de " + ((IServidor) o).str());
+                else if (o instanceof ICliente)
+                    debug("ping de " + ((ICliente) o).str());
                 break;
             }
             default:
@@ -95,6 +96,4 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     public String str() throws RemoteException {
         return ip + ":" + puerto;
     }
-
-    // Funciones locales (para comunicación entre interfaz y api)
 }
