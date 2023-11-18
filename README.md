@@ -25,11 +25,11 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
 ## Tareas
 - Sistema de mensajería instantánea mediante java RMI
   - Servidor:
-    - [ ] Admite conexiones de múltiples clientes.
+    - [x] Admite conexiones de múltiples clientes.
     - Cada vez que se conecte un nuevo cliente:
-      - [ ] Notificar al resto de clientes que hay uno nuevo
-      - [ ] Notificar al recien conectado del resto de clientes conectados.
-      - [ ] Cuando se desconecte, notificar al resto la desconexión.
+      - [x] Notificar al resto de clientes que hay uno nuevo
+      - [x] Notificar al recien conectado del resto de clientes conectados.
+      - [x] Cuando se desconecte, notificar al resto la desconexión.
   - Cliente:
     - [ ] Mecanismo envío/recepción de mensajes.
       - NUNCA pasarán por el servidor.
@@ -48,7 +48,7 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
       - [ ] El concepto de amistad es biyectivo (si A es amigo de B, B lo es de A)
   - Valoración de la práctica:
     - 5 puntos:
-      - [ ] Un servidor aceptando conexiones de múltiples clientes.
+      - [x] Un servidor aceptando conexiones de múltiples clientes.
       - [ ] Todos los clientes son amigos entre sí.
       - [ ] No hay clave de acceso entre los clientes.
     - 2,5 puntos:

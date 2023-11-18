@@ -19,7 +19,7 @@ public class App {
         try {
             new ServidorImpl(puerto);
         } catch (RemoteException e) {
-            System.out.println("[S]: error iniciando servidor " + e.getMessage());
+            System.out.println("error iniciando servidor " + e.getMessage());
             System.exit(2);
         }
     }

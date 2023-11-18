@@ -5,11 +5,11 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-
 import java.util.HashSet;
 import java.util.Set;
 
 import cliente.ICliente;
+import static utils.Utils.*;
 
 public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     Registry registro;
@@ -37,8 +37,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         } catch (AlreadyBoundException e) {
             throw new RemoteException("error al vincular el servidor al registro");
         }
-
-        System.out.println("[S]: servidor listo en el puerto " + puerto);
+        log("servidor iniciado en " + ip + ":" + puerto);
     }
 
     @Override
@@ -46,8 +45,17 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         if (conexiones.contains(c))
             throw new RemoteException("la conexion " + c.str() + " ya existe");
 
+        // Notificar al resto de clientes
+        for (ICliente cc : conexiones) {
+            cc.notificar(EventoConexion.CLIENTE_CONECTADO, c);
+        }
+
+        // Notificar al nuevo cliente de la lista de usuarios
+        c.notificar(EventoConexion.LISTA_CLIENTES, conexiones);
+
+        // Añadir la conexión
         conexiones.add(c);
-        System.out.println("[S]: " + c.str() + " se ha conectado");
+        log(c.str() + " se ha conectado");
     }
 
     @Override
@@ -55,14 +63,20 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         if (!conexiones.contains(c))
             throw new RemoteException("la conexion " + c.str() + " no existe");
 
+        // Eliminar la conexión
         conexiones.remove(c);
-        System.out.println("[S]: " + c.str() + " se ha desconectado");
+        log(c.str() + " se ha desconectado");
+
+        // Notificar al resto de clientes
+        for (ICliente cc : conexiones) {
+            cc.notificar(EventoConexion.CLIENTE_DESCONECTADO, c);
+        }
     }
 
     @Override
     public boolean ping(ICliente c) throws RemoteException {
-        System.out.println("[S]: ping de " + c.str());
-        c.ping(this);
+        log("ping de " + c.str());
+        c.notificar(EventoConexion.PING, this);
         return true;
     }
 

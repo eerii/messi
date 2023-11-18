@@ -1,5 +1,7 @@
 package cliente;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.boot.SpringApplication;
@@ -9,12 +11,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class App {
     public static void main(String[] args) {
         // Argumentos: (web) [puerto_cliente] [puerto_servidor] [ip_servidor]
-        List<String> a = List.of(args);
+        List<String> a = new ArrayList<>(Arrays.asList(args));
         int puerto_c = 6900;
         int puerto_s = 6969;
         String ip_s = "localhost";
 
-        if (a.size() > 0 && a.remove(0).equals("web")) {
+        if (a.size() > 0 && a.get(0).equals("web")) {
+            a.remove(0);
             SpringApplication.run(App.class, args);
         }
 
