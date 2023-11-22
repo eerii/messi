@@ -1,6 +1,7 @@
 package cliente;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 
@@ -10,5 +11,6 @@ import com.vaadin.flow.theme.Theme;
  */
 @PWA(name = "messi", shortName = "messi")
 @Theme("theme")
+@Push
 public class WebApp implements AppShellConfigurator {
 }

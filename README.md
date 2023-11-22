@@ -31,9 +31,9 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
       - [x] Notificar al recien conectado del resto de clientes conectados.
       - [x] Cuando se desconecte, notificar al resto la desconexión.
   - Cliente:
-    - [ ] Mecanismo envío/recepción de mensajes.
-      - NUNCA pasarán por el servidor.
-      - Conexión cliente-cliente.
+    - [x] Mecanismo envío/recepción de mensajes.
+      - [x] NUNCA pasarán por el servidor.
+      - [x] Conexión cliente-cliente.
   - Opcional:
     - [ ] Grupos Gestionar grupos de amistad.
       - [ ] Cada usuario dispone de un grupo de amigos.
@@ -49,8 +49,8 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
   - Valoración de la práctica:
     - 5 puntos:
       - [x] Un servidor aceptando conexiones de múltiples clientes.
-      - [ ] Todos los clientes son amigos entre sí.
-      - [ ] No hay clave de acceso entre los clientes.
+      - [x] Todos los clientes son amigos entre sí.
+      - [x] No hay clave de acceso entre los clientes.
     - 2,5 puntos:
       - [ ] Un servidor aceptando conexiones de múltiples clientes.
       - [ ] Hay grupos de amigos definidos de forma estática.
@@ -65,6 +65,8 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
         - El usuario conoce el nombre de usuario del otro amigo
     - Transversal:
       - [ ] Interfaz gráfica del usuario
+        - [x] Mandar y recibir mensajes
+        - [x] Se actualiza cuando hay nuevos usuarios
         - [ ] Pestaña de registro
         - [ ] Múltiples pestañas para los usuarios
         - [ ] Notificación de usuarios en línea

@@ -1,11 +1,14 @@
 package cliente;
 
 import java.rmi.RemoteException;
-import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
@@ -26,10 +29,11 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.Flex;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.Width;
+
+import cliente.ICliente.Mensaje;
 
 /**
  * The main view contains a button and a click listener.
@@ -37,10 +41,11 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Width;
 @Route("")
 public class MainView extends HorizontalLayout {
     ClienteImpl cliente;
-    List<Chat> chats;
+    Map<ICliente, Chat> chats;
     Chat actual;
     TextField search;
     Tabs tabs;
+    HiloActualizaciones thread;
 
     public MainView() {
         // Esperamos a que la aplicación incialice el cliente y se haya conectado
@@ -56,12 +61,9 @@ public class MainView extends HorizontalLayout {
         addClassNames("chat-view", Width.FULL, Display.FLEX, Flex.AUTO);
 
         // Chats
-        chats = new ArrayList<>(List.of(new Chat("Anna", 0), new Chat("Matt", 3), new Chat("Claire", 1)));
-        for (ICliente c : cliente.clientes) {
-            try {
-                chats.add(new Chat(c.str(), 0));
-            } catch (RemoteException e) {
-            }
+        chats = new HashMap<>();
+        for (ICliente c : cliente.clientes.keySet()) {
+            chats.put(c, new Chat(c));
         }
 
         // Barra de chats
@@ -73,7 +75,7 @@ public class MainView extends HorizontalLayout {
         search.setPrefixComponent(VaadinIcon.SEARCH.create());
 
         tabs = new Tabs();
-        for (Chat chat : chats) {
+        for (Chat chat : chats.values()) {
             tabs.add(new ChatTab(chat));
         }
         tabs.setOrientation(Orientation.VERTICAL);
@@ -86,72 +88,147 @@ public class MainView extends HorizontalLayout {
         lateral.setWidth("18rem");
 
         // Contenido
-        MessageList mensajes = new MessageList();
-
         MessageInput input = new MessageInput();
         input.addSubmitListener(submitEvent -> {
-            MessageListItem msg = new MessageListItem(
-                    submitEvent.getValue(), Instant.now(), "Tú");
-            msg.setUserColorIndex(3);
-            List<MessageListItem> ml = new ArrayList<>(mensajes.getItems());
-            ml.add(msg);
-            mensajes.setItems(ml);
+            String msg = submitEvent.getValue();
+            if (msg.isEmpty())
+                return;
+            actual.nuevoMensaje(new Mensaje(msg));
         });
         input.setWidthFull();
 
         VerticalLayout conversacion = new VerticalLayout();
         conversacion.addClassNames(Flex.AUTO, Overflow.HIDDEN);
-        conversacion.add(mensajes, input);
 
         // Presentación global
         add(conversacion, lateral);
         setSizeFull();
-        expand(mensajes);
 
         // Cambiar de conversacion
         tabs.addSelectedChangeListener(event -> {
             actual = ((ChatTab) event.getSelectedTab()).chat;
-            actual.resetearNoLeidos();
+            conversacion.removeAll();
+            conversacion.add(actual.getList(), input);
         });
+
+        actual = chats.values().iterator().next();
+        conversacion.removeAll();
+        conversacion.add(actual.getList(), input);
     }
 
-    public static class ChatTab extends Tab {
+    public class ChatTab extends Tab {
         final Chat chat;
 
         public ChatTab(Chat chat) {
             this.chat = chat;
             this.addClassNames(JustifyContent.BETWEEN);
-            this.add(new Span(chat.nombre), chat.badge);
+            this.add(new Span(chat.nombre()), chat.badge);
         }
     }
 
-    public static class Chat {
-        String nombre;
+    public class Chat {
+        ICliente usuario;
+        List<Mensaje> mensajes;
         int no_leidos;
+        MessageList html;
         Span badge;
 
-        Chat(String nombre, int no_leidos) {
-            this.nombre = nombre;
-            this.no_leidos = no_leidos;
-
-            this.badge = new Span();
-            this.badge.getElement().getThemeList().add("badge small contrast");
-            actualizarBadge();
-        }
-
-        public void resetearNoLeidos() {
+        Chat(ICliente usuario) {
+            this.usuario = usuario;
             no_leidos = 0;
-            actualizarBadge();
+
+            badge = new Span();
+            badge.getElement().getThemeList().add("badge small contrast");
+
+            html = new MessageList();
+            html.setWidthFull();
+            expand(html);
+
+            actualizarMensajes();
         }
 
-        public void nuevoMensaje() {
-            no_leidos++;
-            actualizarBadge();
+        public String nombre() {
+            if (usuario == null)
+                return "desconocido";
+            try {
+                return usuario.str();
+            } catch (RemoteException e) {
+                return "desconocido";
+            }
         }
 
-        void actualizarBadge() {
+        public void nuevoMensaje(Mensaje msg) {
+            try {
+                cliente.enviar(usuario, msg);
+            } catch (RemoteException e) {
+                System.out.println("error enviando mensaje " + e.getMessage());
+            }
+            actualizarMensajes();
+        }
+
+        public MessageList getList() {
+            return html;
+        }
+
+        public void actualizarMensajes() {
+            mensajes = cliente.clientes.get(usuario);
+
+            List<MessageListItem> ml = new ArrayList<>();
+            for (Mensaje m : mensajes) {
+                ml.add(new MessageListItem(m.msg, m.instant(), m.getUsuario()));
+            }
+            ml.sort((a, b) -> a.getTime().compareTo(b.getTime()));
+            html.setItems(ml);
+
             badge.setText(String.valueOf(no_leidos));
             badge.setVisible(no_leidos != 0);
+        }
+    }
+
+    public class HiloActualizaciones extends Thread {
+        private final UI ui;
+        private final MainView view;
+
+        public HiloActualizaciones(UI ui, MainView view) {
+            this.ui = ui;
+            this.view = view;
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (true) {
+                    Thread.sleep(1000);
+                    ui.access(() -> {
+                        // Actualizar clientes
+                        for (ICliente c : view.cliente.clientes.keySet()) {
+                            if (!view.chats.containsKey(c)) {
+                                view.chats.put(c, new Chat(c));
+                                view.tabs.add(new ChatTab(view.chats.get(c)));
+                            }
+                        }
+
+                        // Eliminar clientes
+                        List<ICliente> eliminar = new ArrayList<>();
+                        for (ICliente c : view.chats.keySet()) {
+                            if (!view.cliente.clientes.containsKey(c)) {
+                                eliminar.add(c);
+                            }
+                        }
+                        for (ICliente c : eliminar) {
+                            view.chats.remove(c);
+                        }
+
+                        // TODO: Eliminar de la barra lateral
+
+                        // Actualizar mensajes
+                        for (Chat c : view.chats.values()) {
+                            c.actualizarMensajes();
+                        }
+                    });
+                }
+            } catch (InterruptedException e) {
+            }
         }
     }
 
@@ -164,6 +241,16 @@ public class MainView extends HorizontalLayout {
         page.addBrowserWindowResizeListener(e -> {
             setMobile(e.getWidth() < 740);
         });
+
+        // Hilo para obtener actualizaciones
+        thread = new HiloActualizaciones(attachEvent.getUI(), this);
+        thread.start();
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        thread.interrupt();
+        thread = null;
     }
 
     private void setMobile(boolean mobile) {

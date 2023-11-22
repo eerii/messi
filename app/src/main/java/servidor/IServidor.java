@@ -25,6 +25,7 @@ public interface IServidor extends Remote, Serializable {
      * Comprueba si el servidor está activo
      * Manda un ping de vuelta al cliente
      * 
+     * @param c Interfaz remota del cliente
      * @return true si el servidor está activo, false en caso contrario
      */
     public boolean ping(ICliente c) throws RemoteException;
