@@ -1,24 +1,36 @@
 package servidor;
 
 import java.rmi.RemoteException;
-import java.util.Map;
 
 import cliente.ClienteImpl;
-import cliente.ICliente;
 import cliente.Mensaje;
+
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
 
 public class App {
     public static void main(String[] args) {
-        // Argumentos: [puerto_servidor]
-        int puerto = 6969;
-        if (args.length > 0) {
-            try {
-                puerto = Integer.parseInt(args[0]);
-            } catch (NumberFormatException e) {
-                System.out.println("el puerto debe ser un entero");
-                System.exit(1);
-            }
+        // Argumentos: [-p puerto_servidor]
+        ArgumentParser parser = ArgumentParsers.newFor("Mess").build()
+                .defaultHelp(true)
+                .description("Servidor de mensajes decentralizado");
+
+        parser.addArgument("-p", "--puerto-servidor")
+                .type(Integer.class)
+                .setDefault(6969)
+                .help("Puerto del servidor");
+
+        Namespace ns = null;
+        try {
+            ns = parser.parseArgs(args);
+        } catch (ArgumentParserException e) {
+            parser.handleError(e);
+            System.exit(1);
         }
+
+        int puerto = ns.getInt("puerto_servidor");
 
         // Creamos el objeto servidor
         ServidorImpl s = null;
@@ -34,7 +46,8 @@ public class App {
         try {
             Thread.sleep(1000);
             String user = "heybot";
-            ICliente c = new ClienteImpl(puerto + 1, s.puerto, s.ip, user);
+            ClienteImpl c = new ClienteImpl(puerto + 1, s.puerto, s.ip);
+            c.iniciarSesion("heybot");
 
             while (true) {
                 for (String u : s.conexiones.keySet()) {

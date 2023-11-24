@@ -86,8 +86,8 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     @Override
     public boolean ping(String user) throws RemoteException {
         try {
-            debug("ping de " + user);
             conexiones.get(user).notificar(EventoConexion.PING, null);
+            debug("ping de " + user);
         } catch (RemoteException e) {
             debug("ping fallido de " + user, Color.ROJO);
             eliminarCliente(user);

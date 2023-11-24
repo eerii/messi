@@ -1,58 +1,74 @@
 package cliente;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.server.PWA;
+import com.vaadin.flow.theme.Theme;
+
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
+
 @SpringBootApplication
-public class App {
+@PWA(name = "Mess", shortName = "Mess")
+@Theme("theme")
+public class App implements AppShellConfigurator {
     static ClienteImpl cliente;
 
     public static void main(String[] args) {
-        // Argumentos: (web) [usuario] [puerto_cliente] [puerto_servidor] [ip_servidor]
-        List<String> a = new ArrayList<>(Arrays.asList(args));
-        int puerto_c = 6900;
-        int puerto_s = 6969;
-        String ip_s = "localhost";
-        String user = "desconocido";
+        // Argumentos
+        ArgumentParser parser = ArgumentParsers.newFor("Mess").build()
+                .defaultHelp(true)
+                .description("Cliente de mensajes decentralizado");
 
-        if (a.size() > 0 && a.get(0).equals("web")) {
-            a.remove(0);
+        parser.addArgument("-c", "--puerto-cliente")
+                .type(Integer.class)
+                .setDefault(6900)
+                .help("Puerto del cliente");
+
+        parser.addArgument("-s", "--puerto-servidor")
+                .type(Integer.class)
+                .setDefault(6969)
+                .help("Puerto del servidor");
+
+        parser.addArgument("-i", "--ip-servidor")
+                .setDefault("localhost")
+                .help("IP del servidor");
+
+        parser.addArgument("-u", "--user")
+                .help("Nombre de usuario");
+
+        parser.addArgument("-w", "--web")
+                .action(net.sourceforge.argparse4j.impl.Arguments.storeTrue())
+                .help("Iniciar interfaz web");
+
+        Namespace ns = null;
+        try {
+            ns = parser.parseArgs(args);
+        } catch (ArgumentParserException e) {
+            parser.handleError(e);
+            System.exit(1);
+        }
+
+        int puerto_c = ns.getInt("puerto_cliente");
+        int puerto_s = ns.getInt("puerto_servidor");
+        String ip_s = ns.getString("ip_servidor");
+
+        if (ns.getBoolean("web")) {
             SpringApplication.run(App.class, args);
-        }
-
-        if (a.size() > 0) {
-            user = a.remove(0);
-        }
-
-        if (a.size() > 0) {
-            try {
-                puerto_c = Integer.parseInt(a.remove(0));
-            } catch (NumberFormatException e) {
-                System.out.println("el puerto del cliente debe ser un entero");
-                System.exit(1);
-            }
-        }
-
-        if (a.size() > 0) {
-            try {
-                puerto_s = Integer.parseInt(a.remove(0));
-            } catch (NumberFormatException e) {
-                System.out.println("el puerto del servidor debe ser un entero");
-                System.exit(1);
-            }
-        }
-
-        if (a.size() > 0) {
-            ip_s = a.remove(0);
         }
 
         // Creamos el objeto cliente
         try {
-            cliente = new ClienteImpl(puerto_c, puerto_s, ip_s, user);
+            cliente = new ClienteImpl(puerto_c, puerto_s, ip_s);
+
+            // Si ha pasado credenciales, iniciar sesión automáticamente
+            if (ns.getString("user") != null) {
+                cliente.iniciarSesion(ns.getString("user"));
+            }
         } catch (Exception e) {
             System.out.println("[C]: error iniciando cliente " + e.getMessage());
             System.exit(2);

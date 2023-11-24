@@ -17,37 +17,31 @@ import static utils.Utils.*;
 
 public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     int puerto;
-    String ip;
+    int puerto_servidor;
+    String ip_servidor;
     String user;
     IServidor servidor;
     Map<String, ICliente> clientes;
     Map<String, List<Mensaje>> mensajes;
 
-    public ClienteImpl(int puerto_c, int puerto_s, String ip_s, String user) throws RemoteException {
+    public ClienteImpl(int puerto_c, int puerto_s, String ip_s) throws RemoteException {
         super(puerto_c);
-        this.user = user;
         this.clientes = new HashMap<>();
         this.mensajes = new HashMap<>();
 
-        // Obtenemos la ip
-        try {
-            this.ip = java.net.InetAddress.getLocalHost().getHostAddress();
-            this.puerto = puerto_c;
-        } catch (java.net.UnknownHostException e) {
-            throw new RemoteException("error al obtener la ip");
-        }
+        this.puerto = puerto_c;
+        this.puerto_servidor = puerto_s;
+        this.ip_servidor = ip_s;
+    }
 
-        // TODO: Mover conectar a una función login
+    // Getters y setters
 
-        // Nos conectamos al servidor y pasamos la interfaz
-        Registry registro = LocateRegistry.getRegistry(ip_s, puerto_s);
-        try {
-            servidor = (IServidor) registro.lookup("Servidor");
-        } catch (NotBoundException e) {
-            throw new RemoteException("error al buscar el servidor en el registro");
-        }
-        servidor.conectar((ICliente) this, user);
-        log("cliente conectado al servidor " + ip_s + ":" + puerto_s);
+    public Map<String, ICliente> getClientes() {
+        return clientes;
+    }
+
+    public Map<String, List<Mensaje>> getMensajes() {
+        return mensajes;
     }
 
     // Funciones de interfaz
@@ -131,5 +125,25 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     public void recibir(String user, Mensaje msg) throws RemoteException {
         mensajes.get(user).add(msg);
         log("mensaje recibido de " + user + " (" + msg.hora() + "): " + msg);
+    }
+
+    // Funciones propias
+
+    public void iniciarSesion(String user) throws RemoteException {
+        this.user = user;
+
+        // Nos conectamos al servidor y pasamos la interfaz
+        Registry registro = LocateRegistry.getRegistry(ip_servidor, puerto_servidor);
+        try {
+            servidor = (IServidor) registro.lookup("Servidor");
+        } catch (NotBoundException e) {
+            throw new RemoteException("error al buscar el servidor en el registro");
+        }
+        servidor.conectar((ICliente) this, user);
+        log("cliente conectado al servidor " + ip_servidor + ":" + puerto_servidor);
+    }
+
+    public boolean estaConectado() {
+        return servidor != null;
     }
 }

@@ -29,8 +29,13 @@ dependencies {
     implementation(enforcedPlatform("com.vaadin:vaadin-bom:24.2.3"))
     implementation("com.vaadin:vaadin-core")
 
+    // Spring boot
     implementation("com.vaadin:vaadin-spring-boot-starter")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+
+    // Argument parser
+    implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

@@ -1,4 +1,4 @@
-# messi
+# Mess
 
 ## Descripción
 
@@ -52,11 +52,11 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
       - [x] Todos los clientes son amigos entre sí.
       - [x] No hay clave de acceso entre los clientes.
     - 2,5 puntos:
-      - [ ] Un servidor aceptando conexiones de múltiples clientes.
+      - [x] Un servidor aceptando conexiones de múltiples clientes.
       - [ ] Hay grupos de amigos definidos de forma estática.
       - [ ] La clave de acceso al sistema deberá poder ser modificada por el cliente.
     - 2,5 puntos:
-      - [ ] Un servidor aceptaando conexiones de múltiples clientes.
+      - [x] Un servidor aceptaando conexiones de múltiples clientes.
       - [ ] Hay grupos de amigos definidos de forma dinámica.
         - [ ] Base de datos para usuarios/lista de sus amigos/ clave acceso.
       - [ ] Mecanismo de registro en la BD de nuevos usuarios.

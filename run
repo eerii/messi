@@ -1,15 +1,22 @@
 #!/bin/bash
 
+OPTS="--console plain -I logger.init.gradle.kts"
+
 if [ "$1" == "cliente" ]; then
-    echo "Cliente: gradlew run -Papp=cliente.App --args ${@:2}"
-    ./gradlew run --console rich -q -Papp=cliente.App --args "${@:2}"
-elif [ "$1" == "clienteweb" ]; then
-    echo "Cliente: gradlew bootRun -Papp=cliente.App --args 'web ${@:2}'"
-    ./gradlew bootRun -Papp=cliente.App --args "web ${@:2}"
+    APP="-Papp=cliente.App"
 elif [ "$1" == "servidor" ]; then
-    echo "Servidor: gradlew run -Papp=servidor.App --args ${@:2}"
-    ./gradlew --console rich -q run -Papp=servidor.App --args "${@:2}"
+    APP="-Papp=servidor.App"
 else
     echo "Usage: $0 cliente|servidor [other args]"
     exit 1
+fi
+
+if [ "$#" -gt 1 ]; then
+    if [[ "$2" == *"-w"* ]]; then
+        ./gradlew $OPTS $APP bootRun --args="$2"
+    else
+        ./gradlew $OPTS $APP run --args="$2"
+    fi
+else
+    ./gradlew $OPTS $APP run
 fi
