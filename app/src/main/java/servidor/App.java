@@ -1,10 +1,11 @@
 package servidor;
 
 import java.rmi.RemoteException;
+import java.util.Map;
 
 import cliente.ClienteImpl;
 import cliente.ICliente;
-import cliente.ICliente.Mensaje;
+import cliente.Mensaje;
 
 public class App {
     public static void main(String[] args) {
@@ -31,24 +32,23 @@ public class App {
         // FIX: Creamos un cliente de prueba
         // Esto está implementado mal y poco seguro
         try {
-            Thread.sleep(3000);
-            ICliente c = new ClienteImpl(puerto + 1, s.puerto, s.ip);
+            Thread.sleep(1000);
+            String user = "heybot";
+            ICliente c = new ClienteImpl(puerto + 1, s.puerto, s.ip, user);
 
             while (true) {
-                for (ICliente cc : s.conexiones.keySet()) {
+                for (String u : s.conexiones.keySet()) {
+                    if (u.equals(user))
+                        continue;
                     try {
-                        if (cc.str().equals(c.str()))
-                            continue;
-                        c.enviar(cc, new Mensaje("^-^"));
-                    } catch (Exception e) {
-                        s.ping(cc);
+                        c.enviar(u, new Mensaje("hey"));
+                    } catch (Exception ex) {
+                        s.ping(u);
                     }
                 }
                 Thread.sleep(15000);
             }
-        } catch (
-
-        Exception e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }

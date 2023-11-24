@@ -10,16 +10,18 @@ public class Utils {
         return LocalDateTime.now().format(fmt);
     }
 
-    public static void log(String msg) {
-        log(msg, Color.AMARILLO);
+    public static void log(String msg, Color... color) {
+        String fmt = "";
+        for (Color col : color)
+            fmt += col;
+        if (fmt.length() == 0)
+            fmt += Color.AMARILLO;
+        System.out.format("%s[%s] %s%s%s\n", fmt, hora(), msg, " ".repeat(Math.max(80 - msg.length(), 1)), Color.RESET);
     }
 
-    public static void log(String msg, Color color) {
-        System.out.println(color + "[" + hora() + "] " + msg + Color.RESET);
-    }
-
-    public static void debug(String msg) {
-        System.out.println("" + Color.ITALIC + Color.VERDE + "[" + hora() + "] " + msg + Color.RESET);
+    public static void debug(String msg, Color... color) {
+        Color c = color.length > 0 ? color[0] : Color.VERDE;
+        log(msg, Color.ITALIC, c);
     }
 
     public enum Color {

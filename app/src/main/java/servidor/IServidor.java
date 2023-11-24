@@ -10,30 +10,32 @@ public interface IServidor extends Remote, Serializable {
     /**
      * Añade un nuevo cliente al serividor
      * 
-     * @param c Interfaz remota del cliente
+     * @param c    Interfaz remota del cliente
+     * @param user Nombre del usuario
      */
-    public void conectar(ICliente c) throws RemoteException;
+    public void conectar(ICliente c, String user) throws RemoteException;
 
     /**
      * Elimina un cliente del servidor
      * 
-     * @param c Interfaz remota del cliente
+     * @param user Nombre del usuario
      */
-    public void salir(ICliente c) throws RemoteException;
+    public void salir(String user) throws RemoteException;
+
+    /**
+     * Obtiene un cliente mediante su nombre
+     * 
+     * @param user Nombre del usuario
+     * @return null si el usuario no está conectado, su interfaz si sí lo está
+     */
+    public ICliente buscar(String user) throws RemoteException;
 
     /**
      * Comprueba si el servidor está activo
      * Manda un ping de vuelta al cliente
      * 
-     * @param c Interfaz remota del cliente
+     * @param user Nombre del usuario
      * @return true si el servidor está activo, false en caso contrario
      */
-    public boolean ping(ICliente c) throws RemoteException;
-
-    /**
-     * Devuelve una representación del servidor
-     * 
-     * @return Representación del servidor
-     */
-    public String str() throws RemoteException;
+    public boolean ping(String user) throws RemoteException;
 }

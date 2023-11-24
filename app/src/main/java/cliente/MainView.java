@@ -33,7 +33,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.Width;
 
-import cliente.ICliente.Mensaje;
+import cliente.Mensaje;
 
 /**
  * The main view contains a button and a click listener.
@@ -41,7 +41,7 @@ import cliente.ICliente.Mensaje;
 @Route("")
 public class MainView extends HorizontalLayout {
     ClienteImpl cliente;
-    Map<ICliente, Chat> chats;
+    Map<String, Chat> chats;
     Chat actual;
     TextField search;
     Tabs tabs;
@@ -62,8 +62,8 @@ public class MainView extends HorizontalLayout {
 
         // Chats
         chats = new HashMap<>();
-        for (ICliente c : cliente.clientes.keySet()) {
-            chats.put(c, new Chat(c));
+        for (String u : cliente.clientes.keySet()) {
+            chats.put(u, new Chat(u));
         }
 
         // Barra de chats
@@ -116,25 +116,25 @@ public class MainView extends HorizontalLayout {
         conversacion.add(actual.getList(), input);
     }
 
-    public class ChatTab extends Tab {
+    class ChatTab extends Tab {
         final Chat chat;
 
         public ChatTab(Chat chat) {
             this.chat = chat;
             this.addClassNames(JustifyContent.BETWEEN);
-            this.add(new Span(chat.nombre()), chat.badge);
+            this.add(new Span(chat.user), chat.badge);
         }
     }
 
-    public class Chat {
-        ICliente usuario;
+    class Chat {
+        String user;
         List<Mensaje> mensajes;
         int no_leidos;
         MessageList html;
         Span badge;
 
-        Chat(ICliente usuario) {
-            this.usuario = usuario;
+        Chat(String user) {
+            this.user = user;
             no_leidos = 0;
 
             badge = new Span();
@@ -147,19 +147,9 @@ public class MainView extends HorizontalLayout {
             actualizarMensajes();
         }
 
-        public String nombre() {
-            if (usuario == null)
-                return "desconocido";
-            try {
-                return usuario.str();
-            } catch (RemoteException e) {
-                return "desconocido";
-            }
-        }
-
         public void nuevoMensaje(Mensaje msg) {
             try {
-                cliente.enviar(usuario, msg);
+                cliente.enviar(user, msg);
             } catch (RemoteException e) {
                 System.out.println("error enviando mensaje " + e.getMessage());
             }
@@ -171,7 +161,7 @@ public class MainView extends HorizontalLayout {
         }
 
         public void actualizarMensajes() {
-            mensajes = cliente.clientes.get(usuario);
+            mensajes = cliente.mensajes.get(user);
 
             List<MessageListItem> ml = new ArrayList<>();
             for (Mensaje m : mensajes) {
@@ -201,7 +191,7 @@ public class MainView extends HorizontalLayout {
                     Thread.sleep(1000);
                     ui.access(() -> {
                         // Actualizar clientes
-                        for (ICliente c : view.cliente.clientes.keySet()) {
+                        for (String c : view.cliente.clientes.keySet()) {
                             if (!view.chats.containsKey(c)) {
                                 view.chats.put(c, new Chat(c));
                                 view.tabs.add(new ChatTab(view.chats.get(c)));
@@ -209,13 +199,13 @@ public class MainView extends HorizontalLayout {
                         }
 
                         // Eliminar clientes
-                        List<ICliente> eliminar = new ArrayList<>();
-                        for (ICliente c : view.chats.keySet()) {
+                        List<String> eliminar = new ArrayList<>();
+                        for (String c : view.chats.keySet()) {
                             if (!view.cliente.clientes.containsKey(c)) {
                                 eliminar.add(c);
                             }
                         }
-                        for (ICliente c : eliminar) {
+                        for (String c : eliminar) {
                             view.chats.remove(c);
                         }
 

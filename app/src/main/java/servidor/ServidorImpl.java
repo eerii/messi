@@ -6,10 +6,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-
-import com.vaadin.flow.internal.Pair;
 
 import cliente.ICliente;
 import static utils.Utils.*;
@@ -19,7 +16,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     int puerto;
     String ip;
 
-    Map<ICliente, String> conexiones;
+    Map<String, ICliente> conexiones;
 
     ServidorImpl(int puerto) throws RemoteException {
         super();
@@ -46,81 +43,88 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     // Funciones de la interfaz
 
     @Override
-    public void conectar(ICliente c) throws RemoteException {
-        comprobarCliente(c);
-        if (conexiones.containsKey(c))
-            throw new RemoteException("la conexion " + conexiones.get(c) + " ya existe");
+    public void conectar(ICliente c, String user) throws RemoteException {
+        comprobarCliente(user);
+        if (conexiones.containsKey(user))
+            throw new RemoteException("el usuario " + user + " ya está conectado");
+
+        // Añadir la conexión
+        conexiones.put(user, c);
+        log(user + " se ha conectado", Color.AZUL);
 
         // Notificar al resto de clientes
-        for (ICliente cc : conexiones.keySet()) {
+        for (Map.Entry<String, ICliente> e : conexiones.entrySet()) {
+            if (e.getKey().equals(user))
+                continue;
             try {
-                cc.notificar(EventoConexion.CLIENTE_CONECTADO, c);
-            } catch (RemoteException e) {
-                eliminarCliente(cc);
+                e.getValue().notificar(EventoConexion.CLIENTE_CONECTADO, user);
+            } catch (RemoteException _e) {
+                eliminarCliente(e.getKey());
             }
         }
 
-        // Añadir la conexión
-        conexiones.put(c, c.str());
-        log(c.str() + " se ha conectado", Color.AZUL);
-
         // Notificar al nuevo cliente de la lista de usuarios
-        c.notificar(EventoConexion.LISTA_CLIENTES, new HashSet<>(conexiones.keySet()));
+        c.notificar(EventoConexion.LISTA_CLIENTES, conexiones);
     }
 
     @Override
-    public void salir(ICliente c) throws RemoteException {
-        if (!conexiones.containsKey(c))
-            throw new RemoteException("la conexion " + conexiones.get(c) + " no existe");
+    public void salir(String user) throws RemoteException {
+        if (!conexiones.containsKey(user))
+            throw new RemoteException("el usuario " + user + " no existe");
 
-        eliminarCliente(c);
+        eliminarCliente(user);
     }
 
     @Override
-    public boolean ping(ICliente c) throws RemoteException {
-        debug("ping de " + conexiones.get(c));
+    public ICliente buscar(String user) throws RemoteException {
+        if (!conexiones.containsKey(user))
+            return null;
+
+        return conexiones.get(user);
+    }
+
+    @Override
+    public boolean ping(String user) throws RemoteException {
         try {
-            c.notificar(EventoConexion.PING, null);
+            debug("ping de " + user);
+            conexiones.get(user).notificar(EventoConexion.PING, null);
         } catch (RemoteException e) {
-            eliminarCliente(c);
+            debug("ping fallido de " + user, Color.ROJO);
+            eliminarCliente(user);
             return false;
         }
         return true;
     }
 
-    @Override
-    public String str() throws RemoteException {
-        return "S" + ip + ":" + puerto;
-    }
-
     // Funciones propias
 
-    void eliminarCliente(ICliente c) {
+    void eliminarCliente(String user) {
         // Notificar al resto de clientes
-        for (ICliente cc : conexiones.keySet()) {
-            if (c.equals(cc))
+        for (Map.Entry<String, ICliente> e : conexiones.entrySet()) {
+            if (e.getKey().equals(user))
                 continue;
+
             try {
-                cc.notificar(EventoConexion.CLIENTE_DESCONECTADO, new Pair<ICliente, String>(c, conexiones.get(c)));
-            } catch (RemoteException e) {
-                eliminarCliente(cc);
+                e.getValue().notificar(EventoConexion.CLIENTE_DESCONECTADO, user);
+            } catch (RemoteException _e) {
+                eliminarCliente(e.getKey());
             }
         }
 
         // Eliminar la conexión
-        if (conexiones.containsKey(c)) {
-            log(conexiones.get(c) + " se ha desconectado", Color.AZUL);
-            conexiones.remove(c);
+        if (conexiones.containsKey(user)) {
+            log(user + " se ha desconectado", Color.AZUL);
+            conexiones.remove(user);
         }
     }
 
-    void comprobarCliente(ICliente c) {
-        if (conexiones.containsKey(c)) {
-            log("comprobando " + conexiones.get(c), Color.AZUL);
+    void comprobarCliente(String user) {
+        if (conexiones.containsKey(user)) {
+            log("comprobando " + user, Color.AZUL);
             try {
-                c.notificar(EventoConexion.PING, null);
+                conexiones.get(user).notificar(EventoConexion.PING, null);
             } catch (RemoteException e) {
-                eliminarCliente(c);
+                eliminarCliente(user);
             }
         }
     }

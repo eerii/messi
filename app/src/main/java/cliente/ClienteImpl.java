@@ -7,12 +7,9 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.vaadin.flow.internal.Pair;
 
 import servidor.EventoConexion;
 import servidor.IServidor;
@@ -21,12 +18,16 @@ import static utils.Utils.*;
 public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     int puerto;
     String ip;
+    String user;
     IServidor servidor;
-    HashMap<ICliente, List<Mensaje>> clientes;
+    Map<String, ICliente> clientes;
+    Map<String, List<Mensaje>> mensajes;
 
-    public ClienteImpl(int puerto_c, int puerto_s, String ip_s) throws RemoteException {
+    public ClienteImpl(int puerto_c, int puerto_s, String ip_s, String user) throws RemoteException {
         super(puerto_c);
+        this.user = user;
         this.clientes = new HashMap<>();
+        this.mensajes = new HashMap<>();
 
         // Obtenemos la ip
         try {
@@ -36,6 +37,8 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             throw new RemoteException("error al obtener la ip");
         }
 
+        // TODO: Mover conectar a una función login
+
         // Nos conectamos al servidor y pasamos la interfaz
         Registry registro = LocateRegistry.getRegistry(ip_s, puerto_s);
         try {
@@ -43,61 +46,69 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         } catch (NotBoundException e) {
             throw new RemoteException("error al buscar el servidor en el registro");
         }
-        servidor.conectar((ICliente) this);
+        servidor.conectar((ICliente) this, user);
         log("cliente conectado al servidor " + ip_s + ":" + puerto_s);
-
-        servidor.ping(this);
     }
 
     // Funciones de interfaz
 
     @Override
+    @SuppressWarnings("unchecked")
     public void notificar(EventoConexion e, Object o) throws RemoteException {
         switch (e) {
-            case CLIENTE_CONECTADO: { // ICliente
-                ICliente c = (ICliente) o;
-                if (!clientes.containsKey(c))
-                    clientes.put(c, new ArrayList<>());
-                log(c.str() + " se ha conectado");
+            case CLIENTE_CONECTADO: { // String
+                String user = (String) o;
+                ICliente c = servidor.buscar(user);
+
+                // Añadimos el usuario a clientes y mensajes si no estaba
+                if (!clientes.containsKey(user))
+                    clientes.put(user, c);
+                if (!mensajes.containsKey(user))
+                    mensajes.put(user, new ArrayList<>());
+
+                log(user + " se ha conectado");
                 break;
             }
-            case CLIENTE_DESCONECTADO: { // ICliente
-                Pair<ICliente, String> c = (Pair<ICliente, String>) o;
-                if (clientes.containsKey(c.getFirst())) {
-                    clientes.remove(c.getFirst());
-                    log(c.getSecond() + " se ha desconectado");
+            case CLIENTE_DESCONECTADO: { // String
+                String user = (String) o;
+                if (clientes.containsKey(user)) {
+                    clientes.remove(user);
+                    log(user + " se ha desconectado");
                 }
                 break;
             }
-            case LISTA_CLIENTES: { // Set<ICliente>
-                Set<ICliente> sc = ((Set<ICliente>) o).stream()
-                        .filter(c -> c.hashCode() != this.hashCode())
-                        .collect(Collectors.toSet());
+            case LISTA_CLIENTES: { // Map<String, ICliente>
+                // Nueva lista de clientes (filtramos para que no se incluya a si mismo)
+                clientes = ((Map<String, ICliente>) o).entrySet().stream()
+                        .filter(e1 -> !e1.getKey().equals(this.user))
+                        .collect(Collectors.toMap(e1 -> e1.getKey(), e1 -> e1.getValue()));
 
-                if (sc.isEmpty())
+                // Creamos una lista de mensajes si no existe
+                for (String user : clientes.keySet()) {
+                    if (!mensajes.containsKey(user))
+                        mensajes.put(user, new ArrayList<>());
+                }
+
+                // Mostramos los clientes conectados
+                if (clientes.size() == 0)
                     log("no hay clientes conectados");
                 else
-                    log("clientes conectados: " + sc.stream()
-                            .map(c -> {
-                                try {
-                                    return c.str();
-                                } catch (RemoteException e1) {
-                                    return "";
-                                }
-                            })
-                            .collect(Collectors.toSet()));
+                    log("clientes conectados: " + clientes.keySet().stream().collect(Collectors.joining(", ")));
 
-                for (ICliente c : sc) {
-                    if (!clientes.containsKey(c))
-                        clientes.put(c, new ArrayList<>());
-                }
                 break;
             }
             case PING: { // IServidor/ICliente
-                if (o instanceof IServidor)
-                    debug("ping de " + ((IServidor) o).str());
-                else if (o instanceof ICliente)
-                    debug("ping de " + ((ICliente) o).str());
+                if (o instanceof ICliente) {
+                    // Obtenemos el nombre de usuario e imprimimos el ping
+                    ICliente c = (ICliente) o;
+                    String user = clientes.entrySet().stream()
+                            .filter(e1 -> e1.getValue().equals(c))
+                            .findFirst()
+                            .get().getKey();
+                    debug("ping de " + user);
+                } else {
+                    debug("ping del servidor");
+                }
                 break;
             }
             default:
@@ -106,29 +117,19 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     }
 
     @Override
-    public void enviar(ICliente c, Mensaje msg) throws RemoteException {
+    public void enviar(String user, Mensaje msg) throws RemoteException {
         try {
-            if (!clientes.containsKey(c))
-                clientes.put(c, new ArrayList<>());
-
-            msg.setUsuario(this.str());
-            clientes.get(c).add(msg);
-            c.recibir(this, msg);
+            msg.setUsuario(this.user);
+            mensajes.get(user).add(msg);
+            clientes.get(user).recibir(this.user, msg);
         } catch (RemoteException e) {
-            servidor.ping(c);
+            servidor.ping(user);
         }
     }
 
     @Override
-    public void recibir(ICliente c, Mensaje msg) throws RemoteException {
-        if (!clientes.containsKey(c))
-            clientes.put(c, new ArrayList<>());
-        clientes.get(c).add(msg);
-        log("mensaje recibido de " + c.str() + " (" + msg.hora() + "): " + msg);
-    }
-
-    @Override
-    public String str() throws RemoteException {
-        return ip + ":" + puerto;
+    public void recibir(String user, Mensaje msg) throws RemoteException {
+        mensajes.get(user).add(msg);
+        log("mensaje recibido de " + user + " (" + msg.hora() + "): " + msg);
     }
 }

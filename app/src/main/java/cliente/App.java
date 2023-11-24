@@ -12,15 +12,20 @@ public class App {
     static ClienteImpl cliente;
 
     public static void main(String[] args) {
-        // Argumentos: (web) [puerto_cliente] [puerto_servidor] [ip_servidor]
+        // Argumentos: (web) [usuario] [puerto_cliente] [puerto_servidor] [ip_servidor]
         List<String> a = new ArrayList<>(Arrays.asList(args));
         int puerto_c = 6900;
         int puerto_s = 6969;
         String ip_s = "localhost";
+        String user = "desconocido";
 
         if (a.size() > 0 && a.get(0).equals("web")) {
             a.remove(0);
             SpringApplication.run(App.class, args);
+        }
+
+        if (a.size() > 0) {
+            user = a.remove(0);
         }
 
         if (a.size() > 0) {
@@ -47,7 +52,7 @@ public class App {
 
         // Creamos el objeto cliente
         try {
-            cliente = new ClienteImpl(puerto_c, puerto_s, ip_s);
+            cliente = new ClienteImpl(puerto_c, puerto_s, ip_s, user);
         } catch (Exception e) {
             System.out.println("[C]: error iniciando cliente " + e.getMessage());
             System.exit(2);
