@@ -7,16 +7,22 @@ if [ "$1" == "cliente" ]; then
 elif [ "$1" == "servidor" ]; then
     APP="-Papp=servidor.App"
 else
-    echo "Usage: $0 cliente|servidor [other args]"
+    echo "Usage: $0 cliente|servidor [\"args\"] [http port]"
     exit 1
 fi
 
+if [ "$#" -gt 2 ]; then
+    PORT="env SERVER_PORT=$3"
+fi
+
+CMD="$PORT ./gradlew $OPTS $APP"
+
 if [ "$#" -gt 1 ]; then
     if [[ "$2" == *"-w"* ]]; then
-        ./gradlew $OPTS $APP bootRun --args="$2"
+        $CMD bootRun --args="$2"
     else
-        ./gradlew $OPTS $APP run --args="$2"
+        $CMD run --args="$2"
     fi
 else
-    ./gradlew $OPTS $APP run
+    $CMD run
 fi

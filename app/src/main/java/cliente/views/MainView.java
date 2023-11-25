@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.H3;
@@ -50,7 +50,6 @@ public class MainView extends HorizontalLayout {
     Chat actual;
     TextField search;
     Tabs tabs;
-    HiloActualizaciones thread;
 
     public MainView(SecurityService security) {
         // Esperamos a que la aplicación incialice el cliente y se haya conectado
@@ -76,12 +75,6 @@ public class MainView extends HorizontalLayout {
         // Estilo
         addClassNames("chat-view", Width.FULL, Display.FLEX, Flex.AUTO);
 
-        // Chats
-        chats = new HashMap<>();
-        for (String u : cliente.getClientes().keySet()) {
-            chats.put(u, new Chat(u));
-        }
-
         // Barra de chats
         H3 titulo_lateral = new H3("Amistades");
 
@@ -91,13 +84,18 @@ public class MainView extends HorizontalLayout {
         search.setPrefixComponent(VaadinIcon.SEARCH.create());
 
         tabs = new Tabs();
-        for (Chat chat : chats.values()) {
-            tabs.add(new ChatTab(chat));
-        }
         tabs.setOrientation(Orientation.VERTICAL);
         tabs.addClassNames(Flex.GROW, Flex.SHRINK, Overflow.HIDDEN);
 
-        Button logout = new Button(user, e -> security.logout());
+        Button logout = new Button(user, e -> {
+            security.logout();
+            cliente.setUI(null, null);
+            try {
+                cliente.cerrarSesion();
+            } catch (RemoteException _e) {
+            }
+            cliente = null;
+        });
 
         Aside lateral = new Aside();
         lateral.addClassNames(Display.FLEX, FlexDirection.COLUMN, Flex.GROW_NONE, Flex.SHRINK_NONE,
@@ -109,7 +107,7 @@ public class MainView extends HorizontalLayout {
         MessageInput input = new MessageInput();
         input.addSubmitListener(submitEvent -> {
             String msg = submitEvent.getValue();
-            if (msg.isEmpty())
+            if (actual == null || chats == null || msg.isEmpty())
                 return;
             actual.nuevoMensaje(new Mensaje(msg));
         });
@@ -130,7 +128,7 @@ public class MainView extends HorizontalLayout {
             conversacion.add(actual.getList(), input);
         });
 
-        if (chats.size() == 0) {
+        if (chats == null || chats.size() == 0) {
             actual = new Chat("No hay chats");
         } else {
             actual = chats.values().iterator().next();
@@ -166,8 +164,6 @@ public class MainView extends HorizontalLayout {
             html = new MessageList();
             html.setWidthFull();
             expand(html);
-
-            actualizarMensajes();
         }
 
         public void nuevoMensaje(Mensaje msg) {
@@ -176,25 +172,20 @@ public class MainView extends HorizontalLayout {
             } catch (RemoteException e) {
                 System.out.println("error enviando mensaje " + e.getMessage());
             }
-            actualizarMensajes();
         }
 
         public MessageList getList() {
             return html;
         }
 
-        public void actualizarMensajes() {
-            if (cliente.getMensajes().containsKey(user)) {
-                mensajes = cliente.getMensajes().get(user);
-            } else {
-                mensajes = new ArrayList<>();
-            }
+        public void actualizarMensajes(List<Mensaje> mensajes) {
+            mensajes.sort((a, b) -> a.instant().compareTo(b.instant()));
+            this.mensajes = mensajes;
 
             List<MessageListItem> ml = new ArrayList<>();
             for (Mensaje m : mensajes) {
                 ml.add(new MessageListItem(m.toString(), m.instant(), m.getUsuario()));
             }
-            ml.sort((a, b) -> a.getTime().compareTo(b.getTime()));
             html.setItems(ml);
 
             badge.setText(String.valueOf(no_leidos));
@@ -202,52 +193,35 @@ public class MainView extends HorizontalLayout {
         }
     }
 
-    public class HiloActualizaciones extends Thread {
-        private final UI ui;
-        private final MainView view;
+    public void actualizarClientes(Set<String> clientes) {
+        if (chats == null)
+            chats = new HashMap<>();
 
-        public HiloActualizaciones(UI ui, MainView view) {
-            this.ui = ui;
-            this.view = view;
-        }
-
-        @Override
-        public void run() {
-            try {
-                while (true) {
-                    Thread.sleep(1000);
-                    ui.access(() -> {
-                        // Actualizar clientes
-                        for (String c : view.cliente.getClientes().keySet()) {
-                            if (!view.chats.containsKey(c)) {
-                                view.chats.put(c, new Chat(c));
-                                view.tabs.add(new ChatTab(view.chats.get(c)));
-                            }
-                        }
-
-                        // Eliminar clientes
-                        List<String> eliminar = new ArrayList<>();
-                        for (String c : view.chats.keySet()) {
-                            if (!view.cliente.getClientes().containsKey(c)) {
-                                eliminar.add(c);
-                            }
-                        }
-                        for (String c : eliminar) {
-                            view.chats.remove(c);
-                        }
-
-                        // TODO: Eliminar de la barra lateral
-
-                        // Actualizar mensajes
-                        // FIX: No se actualiza la ui
-                        for (Chat c : view.chats.values()) {
-                            c.actualizarMensajes();
-                        }
-                    });
-                }
-            } catch (InterruptedException e) {
+        // Añadir clientes
+        for (String c : clientes) {
+            if (!chats.containsKey(c)) {
+                chats.put(c, new Chat(c));
+                tabs.add(new ChatTab(chats.get(c)));
             }
         }
+
+        // Eliminar clientes
+        List<String> eliminar = new ArrayList<>();
+        for (String c : chats.keySet()) {
+            if (!clientes.contains(c)) {
+                eliminar.add(c);
+            }
+        }
+        for (String c : eliminar) {
+            chats.remove(c);
+        }
+    }
+
+    public void actualizarMensajes(String user, List<Mensaje> mensajes) {
+        if (chats == null || !chats.containsKey(user))
+            return;
+
+        chats.get(user).actualizarMensajes(mensajes);
     }
 
     @Override
@@ -260,18 +234,24 @@ public class MainView extends HorizontalLayout {
             setMobile(e.getWidth() < 740);
         });
 
-        // Hilo para obtener actualizaciones
-        thread = new HiloActualizaciones(attachEvent.getUI(), this);
-        thread.start();
+        if (cliente != null)
+            cliente.setUI(attachEvent.getUI(), this);
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        thread.interrupt();
-        thread = null;
+        if (cliente != null) {
+            cliente.setUI(null, null);
+            try {
+                cliente.cerrarSesion();
+            } catch (RemoteException e) {
+            }
+            cliente = null;
+        }
     }
 
     private void setMobile(boolean mobile) {
-        tabs.setOrientation(mobile ? Orientation.HORIZONTAL : Orientation.VERTICAL);
+        if (tabs != null)
+            tabs.setOrientation(mobile ? Orientation.HORIZONTAL : Orientation.VERTICAL);
     }
 }

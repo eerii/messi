@@ -59,7 +59,7 @@ public class App {
                         s.ping(u);
                     }
                 }
-                Thread.sleep(15000);
+                Thread.sleep(10000);
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());

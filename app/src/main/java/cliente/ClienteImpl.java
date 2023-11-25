@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.UI;
+
+import cliente.views.MainView;
 import servidor.EventoConexion;
 import servidor.IServidor;
 import static utils.Utils.*;
@@ -23,6 +26,8 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     IServidor servidor;
     Map<String, ICliente> clientes;
     Map<String, List<Mensaje>> mensajes;
+    UI ui;
+    MainView view;
 
     public ClienteImpl(int puerto_c, int puerto_s, String ip_s) throws RemoteException {
         super(puerto_c);
@@ -44,6 +49,18 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         return mensajes;
     }
 
+    public void setUI(UI ui, MainView view) {
+        this.ui = ui;
+        this.view = view;
+
+        ui.access(() -> {
+            view.actualizarClientes(clientes.keySet());
+            for (String user : mensajes.keySet()) {
+                view.actualizarMensajes(user, mensajes.get(user));
+            }
+        });
+    }
+
     // Funciones de interfaz
 
     @Override
@@ -60,15 +77,29 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                 if (!mensajes.containsKey(user))
                     mensajes.put(user, new ArrayList<>());
 
+                // Actualizamos la vista
+                if (ui != null) {
+                    ui.access(() -> {
+                        view.actualizarClientes(clientes.keySet());
+                    });
+                }
+
                 log(user + " se ha conectado");
                 break;
             }
             case CLIENTE_DESCONECTADO: { // String
                 String user = (String) o;
-                if (clientes.containsKey(user)) {
+                if (clientes.containsKey(user))
                     clientes.remove(user);
-                    log(user + " se ha desconectado");
+
+                // Actualizamos la vista
+                if (ui != null) {
+                    ui.access(() -> {
+                        view.actualizarClientes(clientes.keySet());
+                    });
                 }
+
+                log(user + " se ha desconectado");
                 break;
             }
             case LISTA_CLIENTES: { // Map<String, ICliente>
@@ -81,6 +112,13 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                 for (String user : clientes.keySet()) {
                     if (!mensajes.containsKey(user))
                         mensajes.put(user, new ArrayList<>());
+                }
+
+                // Actualizamos la vista
+                if (ui != null) {
+                    ui.access(() -> {
+                        view.actualizarClientes(clientes.keySet());
+                    });
                 }
 
                 // Mostramos los clientes conectados
@@ -116,6 +154,13 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             msg.setUsuario(this.user);
             mensajes.get(user).add(msg);
             clientes.get(user).recibir(this.user, msg);
+
+            // Actualizamos la vista
+            if (ui != null) {
+                ui.access(() -> {
+                    view.actualizarMensajes(user, mensajes.get(user));
+                });
+            }
         } catch (RemoteException e) {
             servidor.ping(user);
         }
@@ -124,7 +169,15 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     @Override
     public void recibir(String user, Mensaje msg) throws RemoteException {
         mensajes.get(user).add(msg);
-        log("mensaje recibido de " + user + " (" + msg.hora() + "): " + msg);
+
+        // Actualizamos la vista
+        if (ui != null) {
+            ui.access(() -> {
+                view.actualizarMensajes(user, mensajes.get(user));
+            });
+        }
+
+        log("mensaje recibido de " + user + ": " + msg);
     }
 
     // Funciones propias
@@ -141,6 +194,12 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         }
         servidor.conectar((ICliente) this, user);
         log("cliente conectado al servidor " + ip_servidor + ":" + puerto_servidor);
+    }
+
+    public void cerrarSesion() throws RemoteException {
+        servidor.salir(user);
+        servidor = null;
+        log("cliente desconectado del servidor");
     }
 
     public boolean estaConectado() {

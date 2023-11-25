@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 
@@ -15,6 +16,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 @SpringBootApplication
 @PWA(name = "Mess", shortName = "Mess")
 @Theme("theme")
+@Push
 public class App implements AppShellConfigurator {
     static ClienteImpl cliente;
 
