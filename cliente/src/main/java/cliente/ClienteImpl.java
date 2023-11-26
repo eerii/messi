@@ -19,6 +19,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -95,7 +97,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                 byte[] sec = agree.generateSecret();
                 sec = Arrays.copyOf(sec, 16); // Usamos solo los primeros 128 bits (AES)
                 debug("secreto generado con " + user + ": " + emojiFromHex(bytesToHex(sec)));
-                
+
                 this.secreto = new SecretKeySpec(sec, "AES");
             } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException e) {
                 e.printStackTrace();
@@ -135,7 +137,8 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             Map<String, Amigo> conectados = getAmigosConectados();
             view.actualizarClientes(conectados.keySet());
             for (String user : conectados.keySet()) {
-                view.actualizarMensajes(user, conectados.get(user).mensajes);
+                Amigo amigo = conectados.get(user);
+                view.actualizarMensajes(user, amigo.mensajes, amigo.secreto);
             }
         });
     }
@@ -230,9 +233,13 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     public void enviar(String user, Mensaje msg) throws RemoteException {
         try {
             msg.setUsuario(this.user);
-            if (amigos.get(user).secreto != null)
+
+            try {
                 msg.encriptar(amigos.get(user).secreto);
-            else
+            } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+            }
+
+            if (!msg.encriptado())
                 debug("mensaje enviado sin encriptar a " + user + "!", Color.ROJO);
 
             Amigo amigo = amigos.get(user);
@@ -247,7 +254,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             // Actualizamos la vista
             if (ui != null) {
                 ui.access(() -> {
-                    view.actualizarMensajes(user, amigo.mensajes);
+                    view.actualizarMensajes(user, amigo.mensajes, amigo.secreto);
                 });
             }
         } catch (RemoteException e) {
@@ -259,10 +266,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     public void recibir(String user, Mensaje msg) throws RemoteException {
         if (!msg.encriptado()) {
             debug("mensaje sin encriptar recibido de " + user + "!", Color.ROJO);
-        } else {
-            if (amigos.get(user).secreto == null)
-                throw new RemoteException("el usuario " + user + " no tiene un secreto compartido");
-            msg.desencriptar(amigos.get(user).secreto);
         }
 
         Amigo amigo = amigos.get(user);
@@ -274,11 +277,18 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         // Actualizamos la vista
         if (ui != null) {
             ui.access(() -> {
-                view.actualizarMensajes(user, amigo.mensajes);
+                view.actualizarMensajes(user, amigo.mensajes, amigo.secreto);
             });
         }
 
-        log("mensaje recibido de " + user + ": " + msg);
+        String msg_str = " " + msg;
+        if (msg.encriptado())
+            try {
+                msg_str = " " + msg.desencriptar(amigo.secreto);
+            } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+                msg_str = "Error al desencriptar";
+            }
+        log("mensaje recibido de " + user + ": " + msg_str);
     }
 
     @Override

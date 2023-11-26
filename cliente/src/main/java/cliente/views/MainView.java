@@ -1,5 +1,7 @@
 package cliente.views;
 
+import static shared.Utils.*;
+
 import cliente.App;
 import cliente.ClienteImpl;
 import cliente.security.SecurityService;
@@ -11,11 +13,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.SecretKey;
+
 import java.rmi.RemoteException;
+import java.security.InvalidKeyException;
+import java.time.Instant;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.messages.*;
@@ -115,7 +124,7 @@ public class MainView extends HorizontalLayout {
         tabs.addSelectedChangeListener(event -> {
             actual = ((ChatTab) event.getSelectedTab()).chat;
             conversacion.removeAll();
-            conversacion.add(actual.getList(), input);
+            conversacion.add(actual.getTitulo(), actual.getList(), input);
         });
 
         if (chats == null || chats.size() == 0) {
@@ -124,7 +133,28 @@ public class MainView extends HorizontalLayout {
             actual = chats.values().iterator().next();
         }
         conversacion.removeAll();
-        conversacion.add(actual.getList(), input);
+        conversacion.add(actual.getTitulo(), actual.getList(), input);
+    }
+
+    class MensajeDesencriptado {
+        String msg;
+        String user;
+        Instant hora;
+
+        public MensajeDesencriptado(Mensaje msg, SecretKey key) {
+            this.user = msg.getUsuario();
+            this.hora = msg.instant();
+
+            if (msg.encriptado()) {
+                try {
+                    this.msg = msg.desencriptar(key);
+                } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+                    this.msg = "Error al desencriptar";
+                }
+            } else {
+                this.msg = msg.toString();
+            }
+        }
     }
 
     class ChatTab extends Tab {
@@ -139,8 +169,11 @@ public class MainView extends HorizontalLayout {
 
     class Chat {
         String user;
-        List<Mensaje> mensajes;
+        List<MensajeDesencriptado> mensajes;
         int no_leidos;
+        HorizontalLayout titulo;
+        Icon seguro;
+        Span emoticonos;
         MessageList html;
         Span badge;
 
@@ -150,6 +183,14 @@ public class MainView extends HorizontalLayout {
 
             badge = new Span();
             badge.getElement().getThemeList().add("badge small contrast");
+
+            titulo = new HorizontalLayout();
+            seguro = VaadinIcon.LOCK.create();
+            seguro.setSize("1em");
+            emoticonos = new Span(VaadinIcon.UNLOCK.create());
+            titulo.add(new H3(user), emoticonos);
+            titulo.addClassNames(Display.FLEX, JustifyContent.BETWEEN, Margin.NONE);
+            titulo.setWidthFull();
 
             html = new MessageList();
             html.setWidthFull();
@@ -168,13 +209,20 @@ public class MainView extends HorizontalLayout {
             return html;
         }
 
-        public void actualizarMensajes(List<Mensaje> mensajes) {
-            mensajes.sort((a, b) -> a.instant().compareTo(b.instant()));
+        public HorizontalLayout getTitulo() {
+            return titulo;
+        }
+
+        public void actualizarMensajes(List<MensajeDesencriptado> mensajes, String emoji) {
+            mensajes.sort((a, b) -> a.hora.compareTo(b.hora));
             this.mensajes = mensajes;
 
+            emoticonos.removeAll();
+            emoticonos.add(emoji);
+
             List<MessageListItem> ml = new ArrayList<>();
-            for (Mensaje m : mensajes) {
-                ml.add(new MessageListItem(m.toString(), m.instant(), m.getUsuario()));
+            for (MensajeDesencriptado m : mensajes) {
+                ml.add(new MessageListItem(m.msg, m.hora, m.user));
             }
             html.setItems(ml);
 
@@ -207,11 +255,18 @@ public class MainView extends HorizontalLayout {
         }
     }
 
-    public void actualizarMensajes(String user, List<Mensaje> mensajes) {
+    public void actualizarMensajes(String user, List<Mensaje> mensajes, SecretKey key) {
         if (chats == null || !chats.containsKey(user))
             return;
 
-        chats.get(user).actualizarMensajes(mensajes);
+        List<MensajeDesencriptado> ml = new ArrayList<>();
+        for (Mensaje m : mensajes) {
+            ml.add(new MensajeDesencriptado(m, key));
+        }
+
+        String emoji = emojiFromHex(bytesToHex(key.getEncoded()));
+
+        chats.get(user).actualizarMensajes(ml, emoji);
     }
 
     @Override

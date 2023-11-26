@@ -11,9 +11,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import javax.crypto.SecretKey;
-
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 public class Mensaje implements Serializable {
@@ -41,26 +44,19 @@ public class Mensaje implements Serializable {
         this.user = user;
     }
 
-    public void encriptar(SecretKey key) {
-        try {
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-            byte[] bytes = cipher.doFinal(msg.getBytes(StandardCharsets.UTF_8));
-            this.msg = Base64.getEncoder().encodeToString(bytes);
-            this.encriptado = true;
-        } catch (Exception e) {
-            log("error al encriptar mensaje: " + e.getMessage(), Utils.Color.ROJO);
-        }
+    public void encriptar(SecretKey key)
+            throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        byte[] bytes = cipher.doFinal(msg.getBytes(StandardCharsets.UTF_8));
+        this.msg = Base64.getEncoder().encodeToString(bytes);
+        this.encriptado = true;
     }
 
-    public void desencriptar(SecretKey key) {
-        try {
-            cipher.init(Cipher.DECRYPT_MODE, key);
-            byte[] bytes = Base64.getDecoder().decode(msg);
-            this.msg = new String(cipher.doFinal(bytes), StandardCharsets.UTF_8);
-            this.encriptado = false;
-        } catch (Exception e) {
-            log("error al desencriptar mensaje: " + e.getMessage(), Utils.Color.ROJO);
-        }
+    public String desencriptar(SecretKey key)
+            throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] bytes = Base64.getDecoder().decode(msg);
+        return new String(cipher.doFinal(bytes), StandardCharsets.UTF_8);
     }
 
     public String getUsuario() {

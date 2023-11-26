@@ -78,12 +78,10 @@ public class Utils {
 
     public static String emojiFromHex(String hex) {
         StringBuilder sb = new StringBuilder();
-        System.out.println(hex);
-        for (int i = 0; i < hex.length(); i += 4) {
+        for (int i = 10; i < 30; i += 4) {
             int n = Integer.parseInt(hex.substring(i, i + 4), 16);
-            System.out.println(n + " " + emojis.size());
             Emoji emoji = emojis.get(n % emojis.size());
-            sb.append(emoji.getUnicode());
+            sb.append(emoji.getUnicode() + " ");
         }
         return sb.toString();
     }
