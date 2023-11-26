@@ -1,11 +1,9 @@
-package cliente;
+package shared;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-
-import utils.Utils;
 
 public class Mensaje implements Serializable {
     String msg;

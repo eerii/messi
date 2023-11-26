@@ -34,12 +34,12 @@ import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.Width;
+import jakarta.annotation.security.PermitAll;
 
 import cliente.App;
 import cliente.ClienteImpl;
-import cliente.Mensaje;
 import cliente.security.SecurityService;
-import jakarta.annotation.security.PermitAll;
+import shared.Mensaje;
 
 @PermitAll
 @Route(value = "")

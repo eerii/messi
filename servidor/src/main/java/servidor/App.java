@@ -1,17 +1,22 @@
 package servidor;
 
+import shared.Mensaje;
+
 import java.rmi.RemoteException;
 
-import cliente.ClienteImpl;
-import cliente.Mensaje;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
+@SpringBootApplication
 public class App {
     public static void main(String[] args) {
+        SpringApplication.run(App.class, args);
+
         // Argumentos: [-p puerto_servidor]
         ArgumentParser parser = ArgumentParsers.newFor("Mess").build()
                 .defaultHelp(true)
@@ -43,7 +48,7 @@ public class App {
 
         // FIX: Creamos un cliente de prueba
         // Esto está implementado mal y poco seguro
-        try {
+        /*try {
             Thread.sleep(1000);
             String user = "heybot";
             ClienteImpl c = new ClienteImpl(puerto + 1, s.puerto, s.ip);
@@ -63,6 +68,6 @@ public class App {
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
-        }
+        }*/
     }
 }

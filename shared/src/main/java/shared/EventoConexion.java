@@ -1,4 +1,4 @@
-package servidor;
+package shared;
 
 public enum EventoConexion {
     CLIENTE_CONECTADO,

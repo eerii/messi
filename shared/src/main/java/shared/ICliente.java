@@ -1,9 +1,8 @@
-package cliente;
+package shared;
 
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import servidor.EventoConexion;
 
 public interface ICliente extends Remote, Serializable {
 

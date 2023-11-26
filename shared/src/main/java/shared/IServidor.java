@@ -1,10 +1,8 @@
-package servidor;
+package shared;
 
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-
-import cliente.ICliente;
 
 public interface IServidor extends Remote, Serializable {
     /**

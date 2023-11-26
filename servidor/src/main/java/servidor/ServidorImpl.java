@@ -8,8 +8,10 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import cliente.ICliente;
-import static utils.Utils.*;
+import shared.ICliente;
+import shared.IServidor;
+import shared.EventoConexion;
+import static shared.Utils.*;
 
 public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     Registry registro;

@@ -11,4 +11,4 @@ plugins {
 }
 
 rootProject.name = "mess"
-include("app")
+include("cliente", "servidor", "shared")

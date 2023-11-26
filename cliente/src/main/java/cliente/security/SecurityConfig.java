@@ -21,9 +21,8 @@ public class SecurityConfig extends VaadinWebSecurity {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth ->
-                auth.requestMatchers(
-                    AntPathRequestMatcher.antMatcher(HttpMethod.GET)).permitAll());
+        http.authorizeHttpRequests(auth -> auth.requestMatchers(
+                AntPathRequestMatcher.antMatcher(HttpMethod.GET)).permitAll());
         super.configure(http);
         setLoginView(http, LoginView.class);
     }
@@ -35,11 +34,21 @@ public class SecurityConfig extends VaadinWebSecurity {
 
     @Bean
     public UserDetailsService users() {
+        // TODO: Acceder aquí a la base de datos
+        // https://www.baeldung.com/spring-security-authentication-with-a-database
+
         UserDetails user = User.builder()
                 .username("user")
                 .password(passwordEncoder().encode("password"))
                 .roles("USER")
                 .build();
-        return new InMemoryUserDetailsManager(user);
+
+        UserDetails prueba = User.builder()
+                .username("prueba")
+                .password(passwordEncoder().encode("prueba"))
+                .roles("USER")
+                .build();
+
+        return new InMemoryUserDetailsManager(user, prueba);
     }
 }

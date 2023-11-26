@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 import com.vaadin.flow.component.UI;
 
 import cliente.views.MainView;
-import servidor.EventoConexion;
-import servidor.IServidor;
-import static utils.Utils.*;
+import shared.ICliente;
+import shared.IServidor;
+import shared.Mensaje;
+import shared.EventoConexion;
+import static shared.Utils.*;
 
 public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     int puerto;

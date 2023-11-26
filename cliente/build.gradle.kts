@@ -36,6 +36,9 @@ dependencies {
 
     // Argument parser
     implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
+
+    // Project
+    implementation(project(":shared"))
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -47,7 +50,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass.set(project.findProperty("app").toString())
+    mainClass.set("cliente.App")
 }
 
 defaultTasks("build")

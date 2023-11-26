@@ -1,11 +1,15 @@
 #!/bin/bash
 
-OPTS="--console plain -I logger.init.gradle.kts"
+OPTS="--console plain -I ../logger.init.gradle.kts"
+RUN="bootRun"
 
 if [ "$1" == "cliente" ]; then
-    APP="-Papp=cliente.App"
+    APP="-p cliente"
+    if [[ "$2" != *"-w"* ]]; then
+        RUN="run"
+    fi
 elif [ "$1" == "servidor" ]; then
-    APP="-Papp=servidor.App"
+    APP="-p servidor"
 else
     echo "Usage: $0 cliente|servidor [\"args\"] [http port]"
     exit 1
@@ -18,11 +22,7 @@ fi
 CMD="$PORT ./gradlew $OPTS $APP"
 
 if [ "$#" -gt 1 ]; then
-    if [[ "$2" == *"-w"* ]]; then
-        $CMD bootRun --args="$2"
-    else
-        $CMD run --args="$2"
-    fi
+    $CMD $RUN --args="$2"
 else
-    $CMD run
+    $CMD $RUN
 fi
