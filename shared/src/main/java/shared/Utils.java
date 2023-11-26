@@ -2,6 +2,12 @@ package shared;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Set;
+import java.util.ArrayList;
+
+import net.fellbaum.jemoji.Emoji;
+import net.fellbaum.jemoji.EmojiManager;
 
 public class Utils {
     public static DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -54,5 +60,36 @@ public class Utils {
         public String toString() {
             return ansi;
         }
+    }
+
+    public static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes)
+            sb.append(String.format("%02x", b));
+        return sb.toString();
+    }
+
+    static final List<Emoji> emojis;
+    static {
+        Set<Emoji> set = EmojiManager.getAllEmojis();
+        emojis = new ArrayList<>(set);
+        emojis.sort((a, b) -> a.getUnicode().compareTo(b.getUnicode()));
+    }
+
+    public static String emojiFromHex(String hex) {
+        StringBuilder sb = new StringBuilder();
+        System.out.println(hex);
+        for (int i = 0; i < hex.length(); i += 4) {
+            int n = Integer.parseInt(hex.substring(i, i + 4), 16);
+            System.out.println(n + " " + emojis.size());
+            Emoji emoji = emojis.get(n % emojis.size());
+            sb.append(emoji.getUnicode());
+        }
+        return sb.toString();
+    }
+
+    public static String printKey(byte[] key) {
+        String hex = bytesToHex(key);
+        return hex.substring(0, 8) + "..." + hex.substring(hex.length() - 8);
     }
 }

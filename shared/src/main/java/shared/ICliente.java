@@ -29,4 +29,11 @@ public interface ICliente extends Remote, Serializable {
      * @param msg  Mensaje
      */
     public void recibir(String user, Mensaje msg) throws RemoteException;
+
+    /**
+     * Devuelve la llave pública del cliente
+     * 
+     * @return Llave pública
+     */
+    public byte[] pubkey() throws RemoteException;
 }

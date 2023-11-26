@@ -71,3 +71,7 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
         - [x] Múltiples pestañas para los usuarios
         - [ ] Notificación de usuarios en línea
         - [ ] Notificación de mensajes nuevos
+      - [x] Encriptación p2p
+      - [ ] Progressive web app
+      - [ ] UI con múltiples clientes
+      - [ ] Servidor fijo para probar
