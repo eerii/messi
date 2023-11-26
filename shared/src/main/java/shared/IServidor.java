@@ -36,4 +36,21 @@ public interface IServidor extends Remote, Serializable {
      * @return true si el servidor está activo, false en caso contrario
      */
     public boolean ping(String user) throws RemoteException;
+
+    /**
+     * Solicita a un usuario ser su amigo
+     *
+     * @param user  Nombre del usuario
+     * @param amigo Nombre del amigo
+     */
+    public void solicitarAmistad(String user, String amigo) throws RemoteException;
+
+    /**
+     * Responde a una solicitud de amistad
+     *
+     * @param user      Nombre del usuario
+     * @param amigo     Nombre del amigo
+     * @param respuesta true si acepta la solicitud, false en caso contrario
+     */
+    public void responderSolicitud(String user, String amigo, boolean respuesta) throws RemoteException;
 }

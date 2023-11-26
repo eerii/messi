@@ -31,6 +31,7 @@ dependencies {
 
     // Project
     implementation(project(":shared"))
+    implementation(project(":cliente")) // Esto es para poder crear el bot desde el servidor
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

@@ -1,6 +1,7 @@
 package servidor;
 
 import shared.Mensaje;
+import cliente.ClienteImpl;
 
 import java.rmi.RemoteException;
 
@@ -48,14 +49,14 @@ public class App {
 
         // FIX: Creamos un cliente de prueba
         // Esto está implementado mal y poco seguro
-        /*try {
+        try {
             Thread.sleep(1000);
             String user = "heybot";
             ClienteImpl c = new ClienteImpl(puerto + 1, s.puerto, s.ip);
             c.iniciarSesion("heybot");
 
             while (true) {
-                for (String u : s.conexiones.keySet()) {
+                for (String u : c.getAmigosConectados().keySet()) {
                     if (u.equals(user))
                         continue;
                     try {
@@ -68,6 +69,6 @@ public class App {
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
-        }*/
+        }
     }
 }

@@ -35,17 +35,17 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
       - [x] NUNCA pasarán por el servidor.
       - [x] Conexión cliente-cliente.
   - Opcional:
-    - [ ] Grupos Gestionar grupos de amistad.
-      - [ ] Cada usuario dispone de un grupo de amigos.
+    - [x] Grupos Gestionar grupos de amistad.
+      - [x] Cada usuario dispone de un grupo de amigos.
         - [ ] Mecanismo de registro de usuarios
         - [ ] Solicitud de amistad
-          - [ ] Solo si se conoce el nombre del otro usuario
-          - [ ] El otro usuario debe aceptar para que se complete
-            - En ningún caso se notifica si el otro usuario rechaza tu amistad.
+          - [x] Solo si se conoce el nombre del otro usuario
+          - [x] El otro usuario debe aceptar para que se complete
+            - [x] En ningún caso se notifica si el otro usuario rechaza tu amistad.
           - [ ] El servidor almacena solicitudes a usuarios desconectados
-      - [ ] Las notificaciones de conexión/desconexión solo se producen entre amigos.
-      - [ ] Los grupos de amistad son distintos entre usuarios
-      - [ ] El concepto de amistad es biyectivo (si A es amigo de B, B lo es de A)
+      - [x] Las notificaciones de conexión/desconexión solo se producen entre amigos.
+      - [x] Los grupos de amistad son distintos entre usuarios
+      - [x] El concepto de amistad es biyectivo (si A es amigo de B, B lo es de A)
   - Valoración de la práctica:
     - 5 puntos:
       - [x] Un servidor aceptando conexiones de múltiples clientes.
@@ -53,7 +53,7 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
       - [x] No hay clave de acceso entre los clientes.
     - 2,5 puntos:
       - [x] Un servidor aceptando conexiones de múltiples clientes.
-      - [ ] Hay grupos de amigos definidos de forma estática.
+      - [x] Hay grupos de amigos definidos de forma estática.
       - [ ] La clave de acceso al sistema deberá poder ser modificada por el cliente.
     - 2,5 puntos:
       - [x] Un servidor aceptaando conexiones de múltiples clientes.
@@ -68,18 +68,6 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
         - [x] Mandar y recibir mensajes
         - [x] Se actualiza cuando hay nuevos usuarios
         - [ ] Pestaña de registro
-        - [ ] Múltiples pestañas para los usuarios
+        - [x] Múltiples pestañas para los usuarios
         - [ ] Notificación de usuarios en línea
         - [ ] Notificación de mensajes nuevos
-
-## Organización
-
-Los bloques generales son:
-
-- Conexion cliente-servidor (descubrimiento de usarios)
-- Conexion cliente-cliente (mensajes)
-- Base de datos (registro, grupos)
-- Interfaz gráfica
-- Otras funciones (registro, solicitudes, ...)
-
-IMPORTANTE: Arreglar callback de rmi y meter todo en el servidor (no codigo en app)

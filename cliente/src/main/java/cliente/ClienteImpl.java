@@ -1,40 +1,59 @@
 package cliente;
 
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
+import cliente.views.MainView;
+import shared.*;
+import static shared.Utils.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.UI;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
-import cliente.views.MainView;
-import shared.ICliente;
-import shared.IServidor;
-import shared.Mensaje;
-import shared.EventoConexion;
-import static shared.Utils.*;
+import com.vaadin.flow.component.UI;
 
 public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     int puerto;
     int puerto_servidor;
     String ip_servidor;
-    String user;
     IServidor servidor;
-    Map<String, ICliente> clientes;
-    Map<String, List<Mensaje>> mensajes;
+
+    String user;
+    Map<String, Amigo> amigos;
+
     UI ui;
     MainView view;
 
+    class Amigo {
+        List<Mensaje> mensajes;
+        ICliente conexion;
+
+        Amigo() {
+            this.mensajes = new ArrayList<>();
+        }
+
+        void conectar(ICliente c) {
+            this.conexion = c;
+        }
+
+        void desconectar() {
+            this.conexion = null;
+        }
+
+        boolean estaConectado() {
+            return this.conexion != null;
+        }
+    }
+
     public ClienteImpl(int puerto_c, int puerto_s, String ip_s) throws RemoteException {
         super(puerto_c);
-        this.clientes = new HashMap<>();
-        this.mensajes = new HashMap<>();
+        this.amigos = new HashMap<>();
 
         this.puerto = puerto_c;
         this.puerto_servidor = puerto_s;
@@ -43,22 +62,15 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
 
     // Getters y setters
 
-    public Map<String, ICliente> getClientes() {
-        return clientes;
-    }
-
-    public Map<String, List<Mensaje>> getMensajes() {
-        return mensajes;
-    }
-
     public void setUI(UI ui, MainView view) {
         this.ui = ui;
         this.view = view;
 
         ui.access(() -> {
-            view.actualizarClientes(clientes.keySet());
-            for (String user : mensajes.keySet()) {
-                view.actualizarMensajes(user, mensajes.get(user));
+            Map<String, Amigo> conectados = getAmigosConectados();
+            view.actualizarClientes(conectados.keySet());
+            for (String user : conectados.keySet()) {
+                view.actualizarMensajes(user, conectados.get(user).mensajes);
             }
         });
     }
@@ -74,15 +86,18 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                 ICliente c = servidor.buscar(user);
 
                 // Añadimos el usuario a clientes y mensajes si no estaba
-                if (!clientes.containsKey(user))
-                    clientes.put(user, c);
-                if (!mensajes.containsKey(user))
-                    mensajes.put(user, new ArrayList<>());
+                if (!amigos.containsKey(user))
+                    amigos.put(user, new Amigo());
+
+                // Conectamos al usuario
+                if (amigos.get(user).estaConectado())
+                    break;
+                amigos.get(user).conectar(c);
 
                 // Actualizamos la vista
                 if (ui != null) {
                     ui.access(() -> {
-                        view.actualizarClientes(clientes.keySet());
+                        view.actualizarClientes(getAmigosConectados().keySet());
                     });
                 }
 
@@ -91,35 +106,37 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             }
             case CLIENTE_DESCONECTADO: { // String
                 String user = (String) o;
-                if (clientes.containsKey(user))
-                    clientes.remove(user);
+                if (amigos.containsKey(user))
+                    amigos.get(user).desconectar();
 
                 // Actualizamos la vista
                 if (ui != null) {
                     ui.access(() -> {
-                        view.actualizarClientes(clientes.keySet());
+                        view.actualizarClientes(getAmigosConectados().keySet());
                     });
                 }
 
                 log(user + " se ha desconectado");
                 break;
             }
-            case LISTA_CLIENTES: { // Map<String, ICliente>
+            case LISTA_CLIENTES: { // List<String>
                 // Nueva lista de clientes (filtramos para que no se incluya a si mismo)
-                clientes = ((Map<String, ICliente>) o).entrySet().stream()
-                        .filter(e1 -> !e1.getKey().equals(this.user))
-                        .collect(Collectors.toMap(e1 -> e1.getKey(), e1 -> e1.getValue()));
+                List<String> clientes = ((List<String>) o).stream()
+                        .filter(u -> !u.equals(this.user))
+                        .collect(Collectors.toList());
 
-                // Creamos una lista de mensajes si no existe
-                for (String user : clientes.keySet()) {
-                    if (!mensajes.containsKey(user))
-                        mensajes.put(user, new ArrayList<>());
+                // Añadimos a amigos
+                for (String user : clientes) {
+                    if (!amigos.containsKey(user))
+                        amigos.put(user, new Amigo());
+                    ICliente c = servidor.buscar(user);
+                    amigos.get(user).conectar(c);
                 }
 
                 // Actualizamos la vista
                 if (ui != null) {
                     ui.access(() -> {
-                        view.actualizarClientes(clientes.keySet());
+                        view.actualizarClientes(getAmigosConectados().keySet());
                     });
                 }
 
@@ -127,22 +144,16 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                 if (clientes.size() == 0)
                     log("no hay clientes conectados");
                 else
-                    log("clientes conectados: " + clientes.keySet().stream().collect(Collectors.joining(", ")));
+                    log("clientes conectados: " + clientes.stream().collect(Collectors.joining(", ")));
 
                 break;
             }
-            case PING: { // IServidor/ICliente
-                if (o instanceof ICliente) {
-                    // Obtenemos el nombre de usuario e imprimimos el ping
-                    ICliente c = (ICliente) o;
-                    String user = clientes.entrySet().stream()
-                            .filter(e1 -> e1.getValue().equals(c))
-                            .findFirst()
-                            .get().getKey();
-                    debug("ping de " + user);
-                } else {
-                    debug("ping del servidor");
-                }
+            case SOLICITUD_AMISTAD: { // String
+                // FIX: Aceptar solicitud de amistad automáticamente
+                servidor.responderSolicitud(this.user, (String) o, true);
+            }
+            case PING: { // String
+                debug("ping de " + o);
                 break;
             }
             default:
@@ -154,13 +165,20 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     public void enviar(String user, Mensaje msg) throws RemoteException {
         try {
             msg.setUsuario(this.user);
-            mensajes.get(user).add(msg);
-            clientes.get(user).recibir(this.user, msg);
+
+            Amigo amigo = amigos.get(user);
+            if (amigo == null)
+                throw new RemoteException("el usuario " + user + " no existe");
+            if (!amigo.estaConectado())
+                throw new RemoteException("el usuario " + user + " no está conectado");
+
+            amigo.mensajes.add(msg);
+            amigo.conexion.recibir(this.user, msg);
 
             // Actualizamos la vista
             if (ui != null) {
                 ui.access(() -> {
-                    view.actualizarMensajes(user, mensajes.get(user));
+                    view.actualizarMensajes(user, amigo.mensajes);
                 });
             }
         } catch (RemoteException e) {
@@ -170,12 +188,16 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
 
     @Override
     public void recibir(String user, Mensaje msg) throws RemoteException {
-        mensajes.get(user).add(msg);
+        Amigo amigo = amigos.get(user);
+        if (amigo == null)
+            throw new RemoteException("el usuario " + user + " no existe");
+
+        amigo.mensajes.add(msg);
 
         // Actualizamos la vista
         if (ui != null) {
             ui.access(() -> {
-                view.actualizarMensajes(user, mensajes.get(user));
+                view.actualizarMensajes(user, amigo.mensajes);
             });
         }
 
@@ -206,5 +228,11 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
 
     public boolean estaConectado() {
         return servidor != null;
+    }
+
+    public Map<String, Amigo> getAmigosConectados() {
+        return amigos.entrySet().stream()
+                .filter(e -> e.getValue().conexion != null)
+                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
     }
 }

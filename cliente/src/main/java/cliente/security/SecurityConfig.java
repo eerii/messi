@@ -1,7 +1,9 @@
 package cliente.security;
 
 import cliente.views.LoginView;
+
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
