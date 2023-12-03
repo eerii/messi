@@ -2,6 +2,7 @@ package servidor;
 
 import shared.ICliente;
 import shared.IServidor;
+import shared.Utils.Color;
 import shared.EventoConexion;
 import static shared.Utils.*;
 
@@ -17,10 +18,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ServidorImpl extends UnicastRemoteObject implements IServidor {
-    Registry registro;
-    int puerto;
-    String ip;
-    Map<String, Usuario> usuarios;
+    private int puerto;
+    private String ip;
+    private Map<String, Usuario> usuarios;
 
     class Usuario {
         ICliente conexion;
@@ -59,15 +59,15 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         } catch (java.net.UnknownHostException e) {
             throw new RemoteException("error al obtener la ip");
         }
+    }
 
-        // Registramos el servidor en el registro rmi
-        registro = LocateRegistry.createRegistry(puerto);
-        try {
-            registro.bind("Servidor", (IServidor) this);
-        } catch (AlreadyBoundException e) {
-            throw new RemoteException("error al vincular el servidor al registro");
-        }
-        log("servidor iniciado en " + ip + ":" + puerto, Color.AZUL);
+    // getters
+    public int getPuerto() {
+        return puerto;
+    }
+
+    public String getIp() {
+        return ip;
     }
 
     // Funciones de la interfaz

@@ -1,9 +1,16 @@
 package servidor;
 
+import shared.IServidor;
 import shared.Mensaje;
+import shared.Utils.Color;
 import cliente.ClienteImpl;
 
+import static shared.Utils.log;
+
+import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,8 +20,10 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
+
+
 @SpringBootApplication
-public class App {
+public class App { 
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
 
@@ -47,12 +56,22 @@ public class App {
             System.exit(2);
         }
 
+        // Registramos el servidor en el registro rmi
+        try {
+            Registry registro = LocateRegistry.createRegistry(puerto);
+            registro.bind("Servidor", (IServidor) s);
+        } catch (RemoteException | AlreadyBoundException e) {
+            log("error al vincular el servidor al registro: " + e.getMessage());
+        }
+        log("servidor iniciado en " + s.getIp() + ":" + puerto, Color.AZUL);
+
+
         // FIX: Creamos un cliente de prueba
         // Esto está implementado mal y poco seguro
         try {
             Thread.sleep(1000);
             String user = "heybot";
-            ClienteImpl c = new ClienteImpl(puerto + 1, s.puerto, s.ip);
+            ClienteImpl c = new ClienteImpl(puerto + 1, s.getPuerto(), s.getIp());
             c.iniciarSesion("heybot");
 
             while (true) {
