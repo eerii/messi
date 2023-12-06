@@ -83,6 +83,8 @@ public class MainView extends HorizontalLayout {
         search.setPrefixComponent(VaadinIcon.SEARCH.create());
 
         tabs = new Tabs();
+        //<theme-editor-local-classname>
+        tabs.addClassName("main-view-tabs-1");
         tabs.setOrientation(Orientation.VERTICAL);
         tabs.addClassNames(Flex.GROW, Flex.SHRINK, Overflow.HIDDEN);
 
@@ -104,6 +106,8 @@ public class MainView extends HorizontalLayout {
 
         // Contenido
         MessageInput input = new MessageInput();
+        //<theme-editor-local-classname>
+        input.addClassName("main-view-message-input-1");
         input.addSubmitListener(submitEvent -> {
             String msg = submitEvent.getValue();
             if (actual == null || chats == null || msg.isEmpty())

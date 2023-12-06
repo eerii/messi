@@ -6,6 +6,11 @@ import java.rmi.RemoteException;
 
 public interface ICliente extends Remote, Serializable {
 
+
+    /*
+     * Como verificamos que sea solo el servidor el que lo usa?
+     * 
+    */
     /**
      * Recibe una notificacion del servidor
      *
@@ -14,6 +19,13 @@ public interface ICliente extends Remote, Serializable {
      */
     public void notificar(EventoConexion e, Object o) throws RemoteException;
 
+    
+    /*
+     * Realmente tiene que estar en al interfaz la función de enviar?
+     * 
+     * Puede ser fruto de inseguridad, y que otro usuario haga uso de esta función.
+     * 
+    */
     /**
      * Envía un mensaje a otro cliente
      *
