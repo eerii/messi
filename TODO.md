@@ -30,6 +30,11 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
       - [x] Notificar al resto de clientes que hay uno nuevo
       - [x] Notificar al recien conectado del resto de clientes conectados.
       - [x] Cuando se desconecte, notificar al resto la desconexión.
+    - [ ] Verificar quien solicita funcionalidades de la interfaz.
+      - [ ] Certificado digital / contraseña cifrafa
+    - [ ] Limitar el número de peticiones por minuto de un usuario
+      - Un contador de peticiones por usuario
+      - Una task que cada minuto 
   - Cliente:
     - [x] Mecanismo envío/recepción de mensajes.
       - [x] NUNCA pasarán por el servidor.

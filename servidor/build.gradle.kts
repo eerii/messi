@@ -22,12 +22,19 @@ dependencies {
     // This dependency is used by the application.
     implementation("com.google.guava:guava:32.1.1-jre")
 
+
+
     // Spring boot
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation("org.springframework.boot:spring-boot-starter-security")
-
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.2.0")
+    implementation("javax.persistence:javax.persistence-api:2.2")
     // Argument parser
     implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
+
+    // H2 database
+    implementation("com.h2database:h2")
+    
 
     // Project
     implementation(project(":shared"))

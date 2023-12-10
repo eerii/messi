@@ -12,8 +12,11 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -22,7 +25,8 @@ import net.sourceforge.argparse4j.inf.Namespace;
 
 
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "servidor")
+@EnableJpaRepositories(basePackages = "servidor.repository")
 public class App { 
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
@@ -65,9 +69,7 @@ public class App {
         }
         log("servidor iniciado en " + s.getIp() + ":" + puerto, Color.AZUL);
 
-
-        // FIX: Creamos un cliente de prueba
-        // Esto está implementado mal y poco seguro
+        
         try {
             Thread.sleep(1000);
             String user = "heybot";
