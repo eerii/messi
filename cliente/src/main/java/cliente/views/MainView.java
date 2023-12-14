@@ -53,23 +53,23 @@ public class MainView extends HorizontalLayout {
     public MainView(SecurityService security) {
         // Esperamos a que la aplicación incialice el cliente y se haya conectado
         while (cliente == null) {
-            cliente = App.get();
             try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
+                cliente = ClienteImpl.get();
+            } catch (RemoteException e) {
+                add(new H3("Error al conectar al servidor"));
             }
         }
 
         // Conectamos el cliente al servidor
-        String user = security.getAuthenticatedUser().getUsername();
+        /*String user = security.getAuthenticatedUser().getUsername();
         if (!cliente.estaConectado()) {
             try {
-                cliente.iniciarSesion(user);
+                cliente.iniciarSesion(user, "TODO");
             } catch (RemoteException e) {
                 add(new H3("Error al iniciar sesión"));
                 return;
             }
-        }
+        }*/
 
         // Estilo
         addClassNames("chat-view", Width.FULL, Display.FLEX, Flex.AUTO);
@@ -83,12 +83,12 @@ public class MainView extends HorizontalLayout {
         search.setPrefixComponent(VaadinIcon.SEARCH.create());
 
         tabs = new Tabs();
-        //<theme-editor-local-classname>
+        // <theme-editor-local-classname>
         tabs.addClassName("main-view-tabs-1");
         tabs.setOrientation(Orientation.VERTICAL);
         tabs.addClassNames(Flex.GROW, Flex.SHRINK, Overflow.HIDDEN);
 
-        Button logout = new Button(user, e -> {
+        /*Button logout = new Button(user, e -> {
             security.logout();
             cliente.setUI(null, null);
             try {
@@ -96,17 +96,17 @@ public class MainView extends HorizontalLayout {
             } catch (RemoteException _e) {
             }
             cliente = null;
-        });
+        });*/
 
         Aside lateral = new Aside();
         lateral.addClassNames(Display.FLEX, FlexDirection.COLUMN, Flex.GROW_NONE, Flex.SHRINK_NONE,
                 Background.CONTRAST_5, Padding.MEDIUM);
-        lateral.add(titulo_lateral, search, tabs, logout);
+        lateral.add(titulo_lateral, search, tabs); //, logout);
         lateral.setWidth("18rem");
 
         // Contenido
         MessageInput input = new MessageInput();
-        //<theme-editor-local-classname>
+        // <theme-editor-local-classname>
         input.addClassName("main-view-message-input-1");
         input.addSubmitListener(submitEvent -> {
             String msg = submitEvent.getValue();

@@ -36,9 +36,11 @@ import java.security.spec.X509EncodedKeySpec;
 import com.vaadin.flow.component.UI;
 
 public class ClienteImpl extends UnicastRemoteObject implements ICliente {
-    int puerto;
-    int puerto_servidor;
-    String ip_servidor;
+    static ClienteImpl instancia;
+    static int puerto;
+    static int puerto_servidor;
+    static String ip_servidor;
+
     IServidor servidor;
 
     String user;
@@ -107,13 +109,9 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         }
     }
 
-    public ClienteImpl(int puerto_c, int puerto_s, String ip_s) throws RemoteException {
-        super(puerto_c);
+    ClienteImpl() throws RemoteException {
+        super(puerto);
         this.amigos = new HashMap<>();
-
-        this.puerto = puerto_c;
-        this.puerto_servidor = puerto_s;
-        this.ip_servidor = ip_s;
 
         // Generar llaves de encriptación
         try {
@@ -130,6 +128,18 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     }
 
     // Getters y setters
+
+    public static void set(int puerto_c, int puerto_s, String ip_s) {
+        puerto = puerto_c;
+        puerto_servidor = puerto_s;
+        ip_servidor = ip_s;
+    }
+
+    public static ClienteImpl get() throws RemoteException {
+        if (instancia == null)
+            instancia = new ClienteImpl();
+        return instancia;
+    }
 
     public void setUI(UI ui, MainView view) {
         this.ui = ui;
@@ -300,7 +310,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
 
     // Funciones propias
 
-    public void iniciarSesion(String user) throws RemoteException {
+    public void iniciarSesion(String user, String pass) throws RemoteException {
         this.user = user;
 
         // Nos conectamos al servidor y pasamos la interfaz
@@ -310,7 +320,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         } catch (NotBoundException e) {
             throw new RemoteException("error al buscar el servidor en el registro");
         }
-        servidor.conectar((ICliente) this, user);
+        servidor.conectar((ICliente) this, user, pass);
         log("cliente conectado al servidor " + ip_servidor + ":" + puerto_servidor);
     }
 
