@@ -1,17 +1,24 @@
 -- Creación de la tabla UsuarioEntity
-CREATE TABLE Usuario (
+CREATE TABLE usuario (
     username VARCHAR(255) PRIMARY KEY,
     password VARCHAR(255) NOT NULL
 );
 
 -- Creación de la tabla de solicitudes de amistad
 CREATE TABLE solicitudes_amistad (
-    usuario_id VARCHAR(255) REFERENCES Usuario(username),
-    amigo_id VARCHAR(255) REFERENCES Usuario(username)
+    requester VARCHAR(255),
+    requested VARCHAR(255),
+    PRIMARY KEY (requester, requested),
+    FOREIGN KEY (requester) REFERENCES Usuario(username),
+    FOREIGN KEY (requested) REFERENCES Usuario(username)
 );
 
 -- Creación de la tabla de amistades
 CREATE TABLE amistades (
-    usuario_id VARCHAR(255) REFERENCES Usuario(username),
-    amigo_id VARCHAR(255) REFERENCES Usuario(username)
+    amigo1 VARCHAR(255),
+    amigo2 VARCHAR(255),
+    PRIMARY KEY (amigo1, amigo2),
+    FOREIGN KEY (amigo1) REFERENCES Usuario(username),
+    FOREIGN KEY (amigo2) REFERENCES Usuario(username)
 );
+

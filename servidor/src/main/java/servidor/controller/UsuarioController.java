@@ -1,7 +1,7 @@
 package servidor.controller;
 
-import servidor.model.*;
-import servidor.repository.*;
+import servidor.model.Usuario;
+import servidor.repository.UsuarioRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +23,17 @@ public class UsuarioController {
 	@Autowired
 	UsuarioRepository usuarioRepository;
 
-	@GetMapping("/Usuarios")
+	@GetMapping("/users")
 	public ResponseEntity<List<Usuario>> getAllUsuarios() {
+		System.out.println("adios");
 		try {
 			List<Usuario> Usuarios = new ArrayList<Usuario>();
 
 			usuarioRepository.findAll().forEach(Usuarios::add);
+
+			System.out.println(Usuarios + "hola");
+
+			System.out.println("HOla");
 
 			if (Usuarios.isEmpty()) {
                 System.out.println("No se han encontrado usuarios");
@@ -41,7 +46,7 @@ public class UsuarioController {
 		}
 	}
 
-	@GetMapping("/Usuarios/{id}")
+	@GetMapping("/users/{id}")
 	public ResponseEntity<Usuario> getUsuarioById(@PathVariable("id") String id) {
 		Optional<Usuario> UsuarioData = usuarioRepository.findById(id);
 
