@@ -151,6 +151,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         usuarios.get(amigo).solicitudes.add(user);
         log(user + " ha solicitado amistad a " + amigo, Color.AZUL);
 
+        // TODO: Si no está conectado, avisar cuando se conecte
         usuarios.get(amigo).conexion.notificar(EventoConexion.SOLICITUD_AMISTAD, user);
     }
 
