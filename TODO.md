@@ -30,8 +30,8 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
       - [x] Notificar al resto de clientes que hay uno nuevo
       - [x] Notificar al recien conectado del resto de clientes conectados.
       - [x] Cuando se desconecte, notificar al resto la desconexión.
-    - [ ] Verificar quien solicita funcionalidades de la interfaz.
-      - [ ] Certificado digital / contraseña cifrafa
+    - [ ] Verificar quien solicita funcionalidades de la interfaz (Seguridad RMI)
+      - [ ] Contraseña cifrafa
     - [ ] Limitar el número de peticiones por minuto de un usuario
       - Un contador de peticiones por usuario
       - Una task que cada minuto 
@@ -66,17 +66,36 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
         - [ ] Base de datos para usuarios/lista de sus amigos/ clave acceso.
       - [ ] Mecanismo de registro en la BD de nuevos usuarios.
         - [ ] Pide el nombre de usuario/contraseña únicamente.
-      - [ ] Mecanismo para añadir un nuevo amigo.
-        - El usuario conoce el nombre de usuario del otro amigo
+      
     - Transversal:
       - [ ] Interfaz gráfica del usuario
         - [x] Mandar y recibir mensajes
         - [x] Se actualiza cuando hay nuevos usuarios
         - [ ] Pestaña de registro
         - [x] Múltiples pestañas para los usuarios
+        - [ ] Mecanismo para añadir un nuevo amigo.
+          - El usuario conoce el nombre de usuario del otro amigo
+          - [ ] Aceptar solicitud de amistad
         - [ ] Notificación de usuarios en línea
         - [ ] Notificación de mensajes nuevos
+        - [ ] Almacenar claves encriptación cliente
+        - [ ] Almacenar conversaciones clientes
+        - [ ] Aviso si cambia la clave de encriptación
       - [x] Encriptación p2p
       - [ ] Progressive web app
       - [ ] UI con múltiples clientes
       - [ ] Servidor fijo para probar
+
+### Lista importante
+
+(Jorge)
+- Conectar servidor y base de datos
+- Registrar usuario
+- Cambiar contraseña
+
+(Koala)
+- Almacenar solicitudes
+- Guardar datos locales para el cliente
+- Lo que falta de la interfaz
+
+- Más seguridad (contraseñas cifradas, rmi...)

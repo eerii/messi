@@ -71,7 +71,7 @@ public class App {
         log("servidor iniciado en " + s.getIp() + ":" + puerto, Color.AZUL);
 
         
-        try {
+        /*try {
             Thread.sleep(1000);
             String user = "heybot";
             ClienteImpl c = new ClienteImpl(puerto + 1, s.getPuerto(), s.getIp());
@@ -91,6 +91,6 @@ public class App {
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
-        }
+        }*/
     }
 }

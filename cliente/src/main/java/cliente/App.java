@@ -18,8 +18,6 @@ import net.sourceforge.argparse4j.inf.Namespace;
 @Theme("theme")
 @Push
 public class App implements AppShellConfigurator {
-    static ClienteImpl cliente;
-
     public static void main(String[] args) {
         // Argumentos
         ArgumentParser parser = ArgumentParsers.newFor("Mess").build()
@@ -65,19 +63,15 @@ public class App implements AppShellConfigurator {
 
         // Creamos el objeto cliente
         try {
-            cliente = new ClienteImpl(puerto_c, puerto_s, ip_s);
+            ClienteImpl.set(puerto_c, puerto_s, ip_s);
 
             // Si ha pasado credenciales, iniciar sesión automáticamente
             if (ns.getString("user") != null) {
-                cliente.iniciarSesion(ns.getString("user"));
+                ClienteImpl.get().iniciarSesion(ns.getString("user"), "TODO");
             }
         } catch (Exception e) {
             System.out.println("[C]: error iniciando cliente " + e.getMessage());
             System.exit(2);
         }
-    }
-
-    public static ClienteImpl get() {
-        return cliente;
     }
 }

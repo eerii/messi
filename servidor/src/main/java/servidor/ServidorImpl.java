@@ -79,7 +79,9 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     // Funciones de la interfaz
 
     @Override
-    public void conectar(ICliente c, String user) throws RemoteException {
+    public void conectar(ICliente c, String user, String pass) throws RemoteException {
+        // TODO: Comprobar pass en base de datos
+
         comprobarCliente(user);
         if (!usuarios.containsKey(user))
             usuarios.put(user, new User());
@@ -157,6 +159,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         usuarios.get(amigo).solicitudes.add(user);
         log(user + " ha solicitado amistad a " + amigo, Color.AZUL);
 
+        // TODO: Si no está conectado, avisar cuando se conecte
         usuarios.get(amigo).conexion.notificar(EventoConexion.SOLICITUD_AMISTAD, user);
     }
 

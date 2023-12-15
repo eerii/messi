@@ -1,7 +1,0 @@
-if [ "$1" == "servidor" ]; then
-    ./gradlew clean build
-    ./run servidor
-else
-    echo "Usage: $0 cliente|servidor"
-    exit 1
-fi

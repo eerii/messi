@@ -10,8 +10,9 @@ public interface IServidor extends Remote, Serializable {
      * 
      * @param c    Interfaz remota del cliente
      * @param user Nombre del usuario
+     * @param pass Contraseña del usuario (encriptada con bcrypt)
      */
-    public void conectar(ICliente c, String user) throws RemoteException;
+    public void conectar(ICliente c, String user, String pass) throws RemoteException;
 
     /**
      * Elimina un cliente del servidor
