@@ -6,28 +6,33 @@ import shared.Utils.Color;
 import shared.EventoConexion;
 import static shared.Utils.*;
 
-import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import servidor.model.Usuario;
+import servidor.repository.UsuarioRepository;
+
 public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     private int puerto;
     private String ip;
-    private Map<String, Usuario> usuarios;
+    private Map<String, User> usuarios;
 
-    class Usuario {
+
+    class User {
         ICliente conexion;
         List<String> amigos;
         List<String> solicitudes;
 
-        Usuario() {
+        User() {
             this.amigos = new ArrayList<>();
             this.solicitudes = new ArrayList<>();
         }
@@ -59,6 +64,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         } catch (java.net.UnknownHostException e) {
             throw new RemoteException("error al obtener la ip");
         }
+
     }
 
     // getters
@@ -76,7 +82,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     public void conectar(ICliente c, String user) throws RemoteException {
         comprobarCliente(user);
         if (!usuarios.containsKey(user))
-            usuarios.put(user, new Usuario());
+            usuarios.put(user, new User());
 
         if (usuarios.get(user).estaConectado())
             throw new RemoteException("el usuario " + user + " ya está conectado");

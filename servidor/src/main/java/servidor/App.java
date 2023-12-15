@@ -12,7 +12,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -22,7 +22,7 @@ import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
-
+import servidor.repository.UsuarioRepository;
 
 
 @SpringBootApplication(scanBasePackages = "servidor")
@@ -30,6 +30,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 public class App { 
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
+
 
         // Argumentos: [-p puerto_servidor]
         ArgumentParser parser = ArgumentParsers.newFor("Mess").build()

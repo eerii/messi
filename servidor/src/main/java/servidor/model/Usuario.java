@@ -23,6 +23,7 @@ public class Usuario{
     @JsonIgnore
     private ICliente conexion;
 
+    // TODO: CAMBIAR SET A MAP
     // Solicitudes que el Usuario tiene que aceptar o rechazar
     @ManyToMany
     @JoinTable(
@@ -32,6 +33,7 @@ public class Usuario{
     @JsonSerialize(using = SetUsuarioSerializer.class)
     private Set<Usuario> solicitudesAmistad;
 
+    // TODO: CAMBIAR SET A MAPs
     @ManyToMany
     @JoinTable(
             name = "amistades",
@@ -39,6 +41,10 @@ public class Usuario{
             inverseJoinColumns = @JoinColumn(name = "amigo2"))
     @JsonSerialize(using = SetUsuarioSerializer.class)
     private Set<Usuario> amistades;
+
+    @ManyToMany(mappedBy = "amistades")
+    @JsonSerialize(using = SetUsuarioSerializer.class)
+    private Set<Usuario> amistades2;
 
     public Usuario(){
         amistades = new HashSet<>();
@@ -76,6 +82,31 @@ public class Usuario{
 
     public void setAmistades(Set<Usuario> amistades) {
         this.amistades = amistades;
+    }
+
+    
+
+    @Override
+    public int hashCode() {
+        return username.hashCode();
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Usuario other = (Usuario) obj;
+        if (username == null) {
+            if (other.username != null)
+                return false;
+        } else if (!username.equals(other.username))
+            return false;
+        return true;
     }
 
 

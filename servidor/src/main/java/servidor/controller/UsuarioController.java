@@ -25,15 +25,10 @@ public class UsuarioController {
 
 	@GetMapping("/users")
 	public ResponseEntity<List<Usuario>> getAllUsuarios() {
-		System.out.println("adios");
 		try {
 			List<Usuario> Usuarios = new ArrayList<Usuario>();
 
 			usuarioRepository.findAll().forEach(Usuarios::add);
-
-			System.out.println(Usuarios + "hola");
-
-			System.out.println("HOla");
 
 			if (Usuarios.isEmpty()) {
                 System.out.println("No se han encontrado usuarios");
