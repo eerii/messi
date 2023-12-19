@@ -38,12 +38,10 @@ public class Usuario{
             joinColumns = @JoinColumn(name = "amigo1"),
             inverseJoinColumns = @JoinColumn(name = "amigo2"))
     @JsonSerialize(using = SetUsuarioSerializer.class)
-    @Fetch(FetchMode.JOIN)
     private Set<Usuario> amistades;
 
     @ManyToMany(mappedBy = "amistades")
     @JsonSerialize(using = SetUsuarioSerializer.class)
-    @Fetch(FetchMode.JOIN)
     private Set<Usuario> amistades2;
 
     public Usuario(){
@@ -51,6 +49,14 @@ public class Usuario{
         solicitudesAmistad = new HashSet<>();
     }
 
+    public Usuario(String username, String password){
+        this.username = username;
+        this.password = password;
+        amistades = new HashSet<>();
+        solicitudesAmistad = new HashSet<>();
+    }
+
+    // Getters
     public String getUsername() {
         return username;
     }
@@ -71,6 +77,7 @@ public class Usuario{
         return amistades2;
     }
 
+    // Setters
     public void setUsername(String username) {
         this.username = username;
     }
@@ -87,6 +94,34 @@ public class Usuario{
         this.amistades = amistades;
     }
 
+    // Métodos publicos
+
+    public boolean addSolicitud(Usuario solicitante){
+        return solicitudesAmistad.add(solicitante);
+    }
+
+    public boolean replySolicitud(Usuario solicitante, boolean reply){
+        if (!solicitudesAmistad.remove(solicitante) || !reply)
+            return false;
+        return addAmigo(solicitante);
+    }
+
+    public boolean removeAmigo(Usuario amigo){
+        return amistades.remove(amigo) || amistades2.remove(amigo);
+    }
+
+    // Metodos privados
+    private boolean addAmigo(Usuario amigo){
+        amigo.addAmigo2(this);
+        return amistades.add(amigo);
+    }
+
+    private boolean addAmigo2(Usuario amigo){
+        return amistades2.add(amigo);
+    }
+
+    
+    //
     @Override
     public int hashCode() {
         return username.hashCode();

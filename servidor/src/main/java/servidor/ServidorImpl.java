@@ -79,7 +79,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         } catch (java.net.UnknownHostException e) {
             throw new RemoteException("error al obtener la ip");
         }
-        
+
     }
 
     // getters
