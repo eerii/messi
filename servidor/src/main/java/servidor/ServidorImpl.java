@@ -17,14 +17,28 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 
+import servidor.controller.UsuarioService;
 import servidor.model.Usuario;
 import servidor.repository.UsuarioRepository;
+
 
 public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     private int puerto;
     private String ip;
+
+    /*
+     * Esta clase gestiona las conexiones rmi, separandolo de la lógica de guardado
+     */
+    private Map<String, ICliente> conectados;
+
     private Map<String, User> usuarios;
+
+
+    UsuarioService servicio;
 
 
     class User {
@@ -53,9 +67,10 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     // TODO: Bases de datos
     // https://www.baeldung.com/spring-boot-h2-database
 
-    ServidorImpl(int puerto) throws RemoteException {
+    ServidorImpl(int puerto, UsuarioService servicio) throws RemoteException {
         super();
         usuarios = new HashMap<>();
+        this.servicio = servicio;
 
         // Obtenemos la ip
         try {
@@ -64,7 +79,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         } catch (java.net.UnknownHostException e) {
             throw new RemoteException("error al obtener la ip");
         }
-
+        
     }
 
     // getters

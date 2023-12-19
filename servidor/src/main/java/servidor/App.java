@@ -16,12 +16,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
+import servidor.controller.UsuarioService;
 import servidor.repository.UsuarioRepository;
 
 
@@ -29,7 +31,8 @@ import servidor.repository.UsuarioRepository;
 @EnableJpaRepositories(basePackages = "servidor.repository")
 public class App { 
     public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
+        ConfigurableApplicationContext context =  SpringApplication.run(App.class, args);
+        UsuarioService servicio = context.getBean(UsuarioService.class);
 
 
         // Argumentos: [-p puerto_servidor]
@@ -55,7 +58,7 @@ public class App {
         // Creamos el objeto servidor
         ServidorImpl s = null;
         try {
-            s = new ServidorImpl(puerto);
+            s = new ServidorImpl(puerto, servicio);
         } catch (RemoteException e) {
             System.out.println("error iniciando servidor " + e.getMessage());
             System.exit(2);

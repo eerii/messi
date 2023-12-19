@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+// ? por qué extiende a Serializable?
 public interface IServidor extends Remote, Serializable {
     /**
      * Añade un nuevo cliente al serividor

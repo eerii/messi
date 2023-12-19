@@ -21,7 +21,7 @@ fi
 
 CMD="$PORT ./gradlew $OPTS $APP"
 
-if [ "$1" == "servidor" ]; then
+if [ "$1" == "servidorWeb" ]; then
     xdg-open "http://localhost:8080/h2-console"
 fi
 

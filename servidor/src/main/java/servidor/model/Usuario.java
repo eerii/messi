@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -19,11 +22,6 @@ public class Usuario{
 
     private String password;
 
-    @Transient
-    @JsonIgnore
-    private ICliente conexion;
-
-    // TODO: CAMBIAR SET A MAP
     // Solicitudes que el Usuario tiene que aceptar o rechazar
     @ManyToMany
     @JoinTable(
@@ -31,26 +29,27 @@ public class Usuario{
             joinColumns = @JoinColumn(name = "requested"),
             inverseJoinColumns = @JoinColumn(name = "requester"))
     @JsonSerialize(using = SetUsuarioSerializer.class)
+    @Fetch(FetchMode.JOIN)
     private Set<Usuario> solicitudesAmistad;
 
-    // TODO: CAMBIAR SET A MAPs
     @ManyToMany
     @JoinTable(
             name = "amistades",
             joinColumns = @JoinColumn(name = "amigo1"),
             inverseJoinColumns = @JoinColumn(name = "amigo2"))
     @JsonSerialize(using = SetUsuarioSerializer.class)
+    @Fetch(FetchMode.JOIN)
     private Set<Usuario> amistades;
 
     @ManyToMany(mappedBy = "amistades")
     @JsonSerialize(using = SetUsuarioSerializer.class)
+    @Fetch(FetchMode.JOIN)
     private Set<Usuario> amistades2;
 
     public Usuario(){
         amistades = new HashSet<>();
         solicitudesAmistad = new HashSet<>();
     }
-
 
     public String getUsername() {
         return username;
@@ -66,6 +65,10 @@ public class Usuario{
 
     public Set<Usuario> getAmistades() {
         return amistades;
+    }
+
+    public Set<Usuario> getAmistades2() {
+        return amistades2;
     }
 
     public void setUsername(String username) {
@@ -84,13 +87,10 @@ public class Usuario{
         this.amistades = amistades;
     }
 
-    
-
     @Override
     public int hashCode() {
         return username.hashCode();
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -108,7 +108,6 @@ public class Usuario{
             return false;
         return true;
     }
-
 
     @Override
     public String toString() {
