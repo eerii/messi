@@ -1,14 +1,15 @@
 package servidor.controller;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import servidor.model.Usuario;
 import servidor.repository.UsuarioRepository;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -35,7 +36,11 @@ public class UsuarioService {
     }
 
     @Transactional
-    public boolean logout(String username){
+    public boolean unsubscribe(String username){
+        if (!usuarioRepository.existsById(username))
+            return false;
+        usuarioRepository.deleteAllByIdInBatch(Set.of(username));
+        usuarioRepository.flush();
         return true;
     }
 

@@ -4,10 +4,28 @@ import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+
 // ? por qué extiende a Serializable?
 public interface IServidor extends Remote, Serializable {
+
     /**
-     * Añade un nuevo cliente al serividor
+     * Registra un nuevo usuario al servidor
+     * 
+     * @param user Nombre del usuario
+     * @param pass Contraseña del usuario (encriptada con bcrypt)
+     */
+    public void registrar(String user, String pass) throws RemoteException;
+
+    /**
+     * Un usuario registrado se da de baja del servidor
+     * 
+     * @param user Nombre del usuario
+     * @param pass Contraseña el usuario
+     */
+    public void eliminar(String user, String pass) throws RemoteException;
+
+    /**
+     * Un cliente registrado se conecta al servidor
      * 
      * @param c    Interfaz remota del cliente
      * @param user Nombre del usuario
@@ -16,7 +34,7 @@ public interface IServidor extends Remote, Serializable {
     public void conectar(ICliente c, String user, String pass) throws RemoteException;
 
     /**
-     * Elimina un cliente del servidor
+     * Un cliente registrado se desconecta del servidor
      * 
      * @param user Nombre del usuario
      */

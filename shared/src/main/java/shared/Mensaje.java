@@ -1,23 +1,20 @@
 package shared;
 
-import static shared.Utils.log;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import javax.crypto.SecretKey;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import javax.crypto.SecretKey;
 
 public class Mensaje implements Serializable {
     static final Cipher cipher;

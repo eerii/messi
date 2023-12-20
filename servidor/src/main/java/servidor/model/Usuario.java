@@ -1,17 +1,19 @@
 package servidor.model;
 
-import shared.ICliente;
-import jakarta.persistence.*;
+
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import java.util.HashSet;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 
 
 @Entity

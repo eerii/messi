@@ -1,48 +1,27 @@
 package servidor;
 
+import static shared.Utils.debug;
+import static shared.Utils.log;
+
+import java.rmi.ConnectException;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import servidor.controller.UsuarioService;
+import shared.EventoConexion;
 import shared.ICliente;
 import shared.IServidor;
 import shared.Utils.Color;
-import shared.EventoConexion;
-import static shared.Utils.*;
-
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
-import java.rmi.ConnectException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.checkerframework.checker.units.qual.s;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
-
-import servidor.controller.UsuarioService;
-import servidor.model.Usuario;
-import servidor.repository.UsuarioRepository;
 
 
 public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     private int puerto;
     private String ip;
-
-    /*
-     * Esta clase gestiona las conexiones rmi, separandolo de la lógica de guardado
-     */
     private Map<String, ICliente> usuarios;
-
-
-    UsuarioService servicio;
-
-
-    // TODO: Bases de datos
-    // https://www.baeldung.com/spring-boot-h2-database
+    private UsuarioService servicio;
 
     ServidorImpl(int puerto, UsuarioService servicio) throws RemoteException {
         super();
@@ -71,9 +50,23 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     // Funciones de la interfaz
 
     @Override
-    public void conectar(ICliente c, String user, String pass) throws RemoteException {
+    public void registrar(String user, String pass) throws RemoteException{
+        if (servicio.signup(user, pass))
+            throw new RemoteException("el usuario " + user + " ya está registrado");
+    }
 
-        if (estaConectado(user))
+    @Override
+    public void eliminar(String user, String pass) throws RemoteException{
+        if (!servicio.unsubscribe(user))
+            throw new RemoteException("el usuario " + user + " no existe");
+    }
+
+    @Override
+    public void conectar(ICliente c, String user, String pass) throws RemoteException {
+        if (!servicio.existsUser(user))
+            throw new RemoteException("el usuario " + user + " no existe");
+
+        if (notificar(user, EventoConexion.PING, null))
             throw new RemoteException("el usuario " + user + " ya está conectado");
 
         if (!servicio.login(user, pass))
@@ -86,20 +79,19 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         notificarAmigos(user, EventoConexion.CLIENTE_CONECTADO, user);
 
         // Notificar al nuevo cliente de la lista de sus amigos que están conectados
-        c.notificar(EventoConexion.LISTA_CLIENTES, getAmigosConectados(user));
+        notificar(user, EventoConexion.LISTA_CLIENTES, getAmigosConectados(user));
 
         // Notificar al cliente de las solicitudes de amistad pendientes
-        for (String s : servicio.getSolicitudes(user)) {
-            c.notificar(EventoConexion.SOLICITUD_AMISTAD, s);
-        }
+        servicio.getSolicitudes(user).forEach(s ->
+            notificar(user, EventoConexion.SOLICITUD_AMISTAD, s));
     }
-
 
     @Override
     public void salir(String user) throws RemoteException {
+        if (!servicio.existsUser(user))
+            throw new RemoteException("el usuario " + user + " no existe");
         if (!usuarios.containsKey(user))
             throw new RemoteException("el usuario " + user + " no está conectado");
-        servicio.logout(user);
         desconectar(user);
     }
 
@@ -112,17 +104,8 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     }
 
     @Override
-
     public boolean ping(String user) throws RemoteException {
-        try {
-            usuarios.get(user).notificar(EventoConexion.PING, "servidor");
-            debug("ping de " + user);
-        } catch (RemoteException e) {
-            debug("ping fallido de " + user, Color.ROJO);
-            desconectar(user);
-            return false;
-        }
-        return true;
+        return notificar(user, EventoConexion.PING, "servidor");
     }
 
     @Override
@@ -139,10 +122,8 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         if(!servicio.addSolicitud(amigo, user))
             throw new RemoteException("el usuario " + user + " ya es amigo del usuario " + amigo);
         
-            log(user + " ha solicitado amistad a " + amigo, Color.AZUL);
-        if(estaConectado(amigo))
-            usuarios.get(amigo).notificar(EventoConexion.SOLICITUD_AMISTAD, user);
-        
+        log(user + " ha solicitado amistad a " + amigo, Color.AZUL);
+        notificar(amigo, EventoConexion.SOLICITUD_AMISTAD, user);
     }
 
     @Override
@@ -151,50 +132,34 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
             throw new RemoteException("el usuario " + user + " no existe");
         if (!servicio.existsUser(amigo))
             throw new RemoteException("el usuario " + amigo + " no existe");
-        
         // * Gestionar seguridad
         if (!usuarios.containsKey(user))
             throw new RemoteException("el usuario " + user + " no está conectado");
-
         if (servicio.replySolicitud(user, amigo, respuesta))
             throw new RemoteException("no hay ninguna solicitud de amistad de " + amigo + " a " + user);
 
-        if (respuesta) {
+        if (respuesta){
             log(user + " y " + amigo + " ahora son amigos", Color.AZUL);
-
-            if (estaConectado(amigo)) {
-                usuarios.get(amigo).notificar(EventoConexion.CLIENTE_CONECTADO, user);
-            }
-            if (estaConectado(user)) {
-                usuarios.get(user).notificar(EventoConexion.CLIENTE_CONECTADO, amigo);
-            }
+            notificar(amigo, EventoConexion.CLIENTE_CONECTADO, user);
+            notificar(user, EventoConexion.CLIENTE_CONECTADO, amigo);
         }
     }
 
     // Funciones propias
 
     void desconectar(String user) {
-
         // Eliminar la conexión
         if (usuarios.containsKey(user)) {
             log(user + " se ha desconectado", Color.AZUL);
             usuarios.remove(user);
         }
-
         // Notificar a sus amigos
         notificarAmigos(user, EventoConexion.CLIENTE_DESCONECTADO, user);
     }
 
     void notificarAmigos(String user, EventoConexion e, Object o){
         Set<String> amigosConectados = getAmigosConectados(user);
-        amigosConectados.forEach(amigo -> {
-            try {
-                usuarios.get(amigo).notificar(e, o);
-            } catch (RemoteException ex) {
-                log(ex.getMessage(), Color.ROJO);
-
-            }
-        });
+        amigosConectados.forEach(amigo -> notificar(amigo, e, o));
     }
 
     Set<String> getAmigosConectados(String user){
@@ -203,19 +168,23 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         return amigosConectados;
     }
 
-    boolean estaConectado (String user){
+    boolean notificar (String user, EventoConexion e, Object o){
         if (!usuarios.containsKey(user))
             return false;
-        log("comprobando conexion " + user, Color.AZUL);
+        debug("notificando a  " + user + ": " + e, Color.AZUL);
         try {
-            usuarios.get(user).notificar(EventoConexion.PING, null);
-            log(user + " está conectado", Color.AZUL);
+            usuarios.get(user).notificar(e, o);
+            debug(user + " ha sido notificado: " + e, Color.AZUL);
             return true;
-        } catch (ConnectException e) {
+        } catch (ConnectException ex ) {
             desconectar(user);
+            debug(user + " no está conectado" + e, Color.ROJO);
+            //log(ex.getMessage(), Color.ROJO);
             return false;
-        } catch (RemoteException e){
+        } catch (RemoteException ex){
             desconectar(user);
+            debug("Fallo notificando a  " + user + " de: " + e, Color.ROJO);
+            //log(ex.getMessage(), Color.ROJO);
             return false;
         }
     }

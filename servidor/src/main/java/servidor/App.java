@@ -1,10 +1,5 @@
 package servidor;
 
-import shared.IServidor;
-import shared.Mensaje;
-import shared.Utils.Color;
-import cliente.ClienteImpl;
-
 import static shared.Utils.log;
 
 import java.rmi.AlreadyBoundException;
@@ -12,10 +7,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
@@ -24,7 +17,8 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 import servidor.controller.UsuarioService;
-import servidor.repository.UsuarioRepository;
+import shared.IServidor;
+import shared.Utils.Color;
 
 
 @SpringBootApplication(scanBasePackages = "servidor")
