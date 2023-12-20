@@ -101,8 +101,10 @@ public class Usuario{
     }
 
     public boolean replySolicitud(Usuario solicitante, boolean reply){
-        if (!solicitudesAmistad.remove(solicitante) || !reply)
+        if (!solicitudesAmistad.remove(solicitante))
             return false;
+        if (!reply)
+            return true;
         return addAmigo(solicitante);
     }
 

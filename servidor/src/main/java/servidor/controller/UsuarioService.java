@@ -105,11 +105,16 @@ public class UsuarioService {
     }
 
     @Transactional
+    public boolean existsUser(String username){
+        return usuarioRepository.existsById(username);
+    }
+
+    @Transactional
     private Usuario loadUser (String username){
         Optional<Usuario> UsuarioData = usuarioRepository.findById(username);
         if(!UsuarioData.isPresent())
             return null;
         return UsuarioData.get();
     }
-    
+
 }

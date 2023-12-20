@@ -23,6 +23,7 @@ public interface IServidor extends Remote, Serializable {
     public void salir(String user) throws RemoteException;
 
     /**
+     * ? Hace falta esta función en la interfaz ?
      * Obtiene un cliente mediante su nombre
      * 
      * @param user Nombre del usuario
@@ -31,6 +32,7 @@ public interface IServidor extends Remote, Serializable {
     public ICliente buscar(String user) throws RemoteException;
 
     /**
+     * ? Verdaderamente debería ser una función de la interfaz
      * Comprueba si el servidor está activo
      * Manda un ping de vuelta al cliente
      * 
