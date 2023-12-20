@@ -68,6 +68,16 @@ public class UsuarioService {
     }
 
     @Transactional
+    public boolean changePassword(String username, String oldPassword, String newPassword){
+        Usuario usuario = loadUser(username);
+        if (usuario == null || !usuario.getPassword().equals(oldPassword))
+            return false;
+        usuario.setPassword(newPassword);
+        usuarioRepository.saveAndFlush(usuario);
+        return true;
+    }
+
+    @Transactional
     public boolean removeAmigo(String username, String amigoUsername){
         Usuario usuario = loadUser(username);
         Usuario amigo   = loadUser(amigoUsername);

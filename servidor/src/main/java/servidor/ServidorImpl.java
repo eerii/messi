@@ -95,18 +95,6 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         desconectar(user);
     }
 
-    @Override
-    public ICliente buscar(String user) throws RemoteException {
-        if (!usuarios.containsKey(user))
-            return null;
-
-        return usuarios.get(user);
-    }
-
-    @Override
-    public boolean ping(String user) throws RemoteException {
-        return notificar(user, EventoConexion.PING, "servidor");
-    }
 
     @Override
     public void solicitarAmistad(String user, String amigo) throws RemoteException {
@@ -143,6 +131,17 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
             notificar(amigo, EventoConexion.CLIENTE_CONECTADO, user);
             notificar(user, EventoConexion.CLIENTE_CONECTADO, amigo);
         }
+    }
+
+    @Override
+    public void cambiarPassword(String user, String oldPassword, String newPassword) throws RemoteException{
+        if (!servicio.existsUser(user))
+            throw new RemoteException("el usuario " + user + " no existe");
+        // * Gestionar seguridad
+        if (!usuarios.containsKey(user))
+            throw new RemoteException("el usuario " + user + " no está conectado");
+            
+        servicio.changePassword(user, oldPassword, newPassword);
     }
 
     // Funciones propias

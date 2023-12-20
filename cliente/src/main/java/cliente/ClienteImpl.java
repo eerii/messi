@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -158,12 +158,17 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     // Funciones de interfaz
 
     @Override
+    public String getUsername() throws RemoteException{
+        return user;
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void notificar(EventoConexion e, Object o) throws RemoteException {
         switch (e) {
-            case CLIENTE_CONECTADO: { // String
-                String user = (String) o;
-                ICliente c = servidor.buscar(user);
+            case CLIENTE_CONECTADO: { // ICliente
+                ICliente c = (ICliente) o;
+                String user = c.getUsername();
 
                 // Añadimos el usuario a clientes y mensajes si no estaba
                 if (!amigos.containsKey(user))
@@ -199,18 +204,20 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                 log(user + " se ha desconectado");
                 break;
             }
-            case LISTA_CLIENTES: { // List<String>
+            case LISTA_CLIENTES: { // Set<ICliente>
                 // Nueva lista de clientes (filtramos para que no se incluya a si mismo)
-                List<String> clientes = ((List<String>) o).stream()
-                        .filter(u -> !u.equals(this.user))
-                        .collect(Collectors.toList());
+                Set<ICliente> clientes = (Set<ICliente>) o;
+                List<String>  usernames = new ArrayList<>();
+                clientes.remove(this);
 
                 // Añadimos a amigos
-                for (String user : clientes) {
-                    if (!amigos.containsKey(user))
+                for (ICliente c : clientes) {
+                    String user = c.getUsername();
+                    usernames.add(user);
+                    if(!amigos.containsKey(user)){
                         amigos.put(user, new Amigo(user));
-                    ICliente c = servidor.buscar(user);
-                    amigos.get(user).conectar(c);
+                        amigos.get(user).conectar(c);
+                    }
                 }
 
                 // Actualizamos la vista
@@ -224,12 +231,11 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                 if (clientes.size() == 0)
                     log("no hay clientes conectados");
                 else
-                    log("clientes conectados: " + clientes.stream().collect(Collectors.joining(", ")));
-
+                    log("clientes conectados: " + usernames.stream().collect(Collectors.joining(", ")));
                 break;
             }
             case SOLICITUD_AMISTAD: { // String
-                // FIX: Aceptar solicitud de amistad automáticamente
+                // TODO: Aceptar solicitud de amistad automáticamente
                 servidor.responderSolicitud(this.user, (String) o, true);
             }
             case PING: { // String
@@ -238,39 +244,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             }
             default:
                 break;
-        }
-    }
-
-    @Override
-    public void enviar(String user, Mensaje msg) throws RemoteException {
-        try {
-            msg.setUsuario(this.user);
-
-            try {
-                msg.encriptar(amigos.get(user).secreto);
-            } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-            }
-
-            if (!msg.encriptado())
-                debug("mensaje enviado sin encriptar a " + user + "!", Color.ROJO);
-
-            Amigo amigo = amigos.get(user);
-            if (amigo == null)
-                throw new RemoteException("el usuario " + user + " no existe");
-            if (!amigo.estaConectado())
-                throw new RemoteException("el usuario " + user + " no está conectado");
-
-            amigo.mensajes.add(msg);
-            amigo.conexion.recibir(this.user, msg);
-
-            // Actualizamos la vista
-            if (ui != null) {
-                ui.access(() -> {
-                    view.actualizarMensajes(user, amigo.mensajes, amigo.secreto);
-                });
-            }
-        } catch (RemoteException e) {
-            servidor.ping(user);
         }
     }
 
@@ -310,16 +283,39 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
 
     // Funciones propias
 
-    public void iniciarSesion(String user, String pass) throws RemoteException {
-        this.user = user;
-
-        // Nos conectamos al servidor y pasamos la interfaz
+    private boolean conectarServidor() throws RemoteException{
         Registry registro = LocateRegistry.getRegistry(ip_servidor, puerto_servidor);
         try {
             servidor = (IServidor) registro.lookup("Servidor");
+            return true;
         } catch (NotBoundException e) {
             throw new RemoteException("error al buscar el servidor en el registro");
         }
+    }
+
+    public void registrarse(String user, String pass) throws RemoteException{
+        if (this.user == null)
+            this.user = user;
+
+        if(!estaConectado())
+            conectarServidor();
+        
+        servidor.registrar(user, pass);
+        log("cliente registrado en el servidor " + ip_servidor + ":" + puerto_servidor);
+    }
+
+    public void desubscribirse(String password) throws RemoteException{
+        servidor.eliminar(user, password);
+    }
+
+    public void iniciarSesion(String user, String pass) throws RemoteException {
+        if (this.user == null)
+            this.user = user;
+
+        // Nos conectamos al servidor y pasamos la interfaz
+        if(!estaConectado())
+            conectarServidor();
+        
         servidor.conectar((ICliente) this, user, pass);
         log("cliente conectado al servidor " + ip_servidor + ":" + puerto_servidor);
     }
@@ -330,11 +326,54 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         log("cliente desconectado del servidor");
     }
 
+    public void enviar(String user, Mensaje msg) {
+        try {
+            msg.setUsuario(this.user);
+
+            try {
+                msg.encriptar(amigos.get(user).secreto);
+            } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+                debug("No se ha podido encriptar el mensaje a" + user, Color.ROJO);
+            }
+
+            if (!msg.encriptado())
+                debug("mensaje enviado sin encriptar a " + user + "!", Color.ROJO);
+
+            Amigo amigo = amigos.get(user);
+
+            if (amigo == null)
+                return;
+                //throw new RemoteException("el usuario " + user + " no existe");
+            if (!amigo.estaConectado())
+                return;
+                //throw new RemoteException("el usuario " + user + " no está conectado");
+            
+            amigo.mensajes.add(msg);
+
+            amigo.conexion.recibir(this.user, msg);
+
+            // Actualizamos la vista
+            if (ui != null) {
+                ui.access(() -> {
+                    view.actualizarMensajes(user, amigo.mensajes, amigo.secreto);
+                });
+            }
+
+        } catch (RemoteException e) {
+            debug("no se ha podido enviar el mensaje a:" + user, Color.ROJO);
+        }
+    }
+
+    public void cambiarPassword(String oldPassword, String newPassword) throws RemoteException{
+
+        servidor.cambiarPassword(user, oldPassword, newPassword);
+    }
+
     public boolean estaConectado() {
         return servidor != null;
     }
 
-    public Map<String, Amigo> getAmigosConectados() {
+    private Map<String, Amigo> getAmigosConectados() {
         return amigos.entrySet().stream()
                 .filter(e -> e.getValue().conexion != null)
                 .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));

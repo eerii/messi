@@ -41,25 +41,6 @@ public interface IServidor extends Remote, Serializable {
     public void salir(String user) throws RemoteException;
 
     /**
-     * ? Hace falta esta función en la interfaz ?
-     * Obtiene un cliente mediante su nombre
-     * 
-     * @param user Nombre del usuario
-     * @return null si el usuario no está conectado, su interfaz si sí lo está
-     */
-    public ICliente buscar(String user) throws RemoteException;
-
-    /**
-     * ? Verdaderamente debería ser una función de la interfaz
-     * Comprueba si el servidor está activo
-     * Manda un ping de vuelta al cliente
-     * 
-     * @param user Nombre del usuario
-     * @return true si el servidor está activo, false en caso contrario
-     */
-    public boolean ping(String user) throws RemoteException;
-
-    /**
      * Solicita a un usuario ser su amigo
      *
      * @param user  Nombre del usuario
@@ -75,4 +56,14 @@ public interface IServidor extends Remote, Serializable {
      * @param respuesta true si acepta la solicitud, false en caso contrario
      */
     public void responderSolicitud(String user, String amigo, boolean respuesta) throws RemoteException;
+
+    /**
+     * Un usuario registrado puede cambiar su contraseña
+     * 
+     * @param user             Nombre del usuario
+     * @param oldPassword      Antigua contraseña del usuario
+     * @param newPassword      Nueva contraseña del usuario
+     * @throws RemoteException
+     */
+    public void cambiarPassword(String user, String oldPassword, String newPassword) throws RemoteException;
 }

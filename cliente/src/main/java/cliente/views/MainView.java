@@ -2,7 +2,7 @@ package cliente.views;
 
 import static shared.Utils.*;
 
-import cliente.App;
+
 import cliente.ClienteImpl;
 import cliente.security.SecurityService;
 import shared.Mensaje;
@@ -23,7 +23,6 @@ import java.time.Instant;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.html.*;
@@ -202,11 +201,7 @@ public class MainView extends HorizontalLayout {
         }
 
         public void nuevoMensaje(Mensaje msg) {
-            try {
                 cliente.enviar(user, msg);
-            } catch (RemoteException e) {
-                System.out.println("error enviando mensaje " + e.getMessage());
-            }
         }
 
         public MessageList getList() {
