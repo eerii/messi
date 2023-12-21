@@ -7,6 +7,7 @@ import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,10 +77,12 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         log(user + " se ha conectado", Color.AZUL);
 
         // Notificar a los usuarios que son sus amigos
-        notificarAmigos(user, EventoConexion.CLIENTE_CONECTADO, user);
+        notificarAmigos(user, EventoConexion.CLIENTE_CONECTADO, c);
 
         // Notificar al nuevo cliente de la lista de sus amigos que están conectados
-        notificar(user, EventoConexion.LISTA_CLIENTES, getAmigosConectados(user));
+        Set <ICliente> amigos = new HashSet<>();
+        getAmigosConectados(user).forEach(a -> amigos.add(usuarios.get(a)));
+        notificar(user, EventoConexion.LISTA_CLIENTES, amigos);
 
         // Notificar al cliente de las solicitudes de amistad pendientes
         servicio.getSolicitudes(user).forEach(s ->
@@ -166,6 +169,8 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         amigosConectados.retainAll(usuarios.keySet());
         return amigosConectados;
     }
+
+    
 
     boolean notificar (String user, EventoConexion e, Object o){
         if (!usuarios.containsKey(user))
