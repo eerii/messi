@@ -25,9 +25,8 @@ import shared.Utils.Color;
 @EnableJpaRepositories(basePackages = "servidor.repository")
 public class App { 
     public static void main(String[] args) {
-        ConfigurableApplicationContext context =  SpringApplication.run(App.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(App.class, args);
         UsuarioService servicio = context.getBean(UsuarioService.class);
-
 
         // Argumentos: [-p puerto_servidor]
         ArgumentParser parser = ArgumentParsers.newFor("Mess").build()

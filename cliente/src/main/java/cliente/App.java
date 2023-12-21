@@ -1,23 +1,20 @@
 package cliente;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.component.page.Push;
-import com.vaadin.flow.server.PWA;
-import com.vaadin.flow.theme.Theme;
-
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-@SpringBootApplication
-@PWA(name = "Mess", shortName = "Mess")
-@Theme("theme")
-@Push
-public class App implements AppShellConfigurator {
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+
+import atlantafx.base.theme.PrimerDark;
+
+public class App extends Application {
     public static void main(String[] args) {
         // Argumentos
         ArgumentParser parser = ArgumentParsers.newFor("Mess").build()
@@ -41,10 +38,6 @@ public class App implements AppShellConfigurator {
         parser.addArgument("-u", "--user")
                 .help("Nombre de usuario");
 
-        parser.addArgument("-w", "--web")
-                .action(net.sourceforge.argparse4j.impl.Arguments.storeTrue())
-                .help("Iniciar interfaz web");
-
         Namespace ns = null;
         try {
             ns = parser.parseArgs(args);
@@ -57,21 +50,27 @@ public class App implements AppShellConfigurator {
         int puerto_s = ns.getInt("puerto_servidor");
         String ip_s = ns.getString("ip_servidor");
 
-        if (ns.getBoolean("web")) {
-            SpringApplication.run(App.class, args);
-        }
-
-        // Creamos el objeto cliente
         try {
             ClienteImpl.set(puerto_c, puerto_s, ip_s);
-
-            // Si ha pasado credenciales, iniciar sesión automáticamente
-            if (ns.getString("user") != null) {
-                ClienteImpl.get().iniciarSesion(ns.getString("user"), "TODO");
-            }
         } catch (Exception e) {
             System.out.println("[C]: error iniciando cliente " + e.getMessage());
             System.exit(2);
         }
+
+        // Lanzamos JavaFX
+        launch();
+    }
+
+    @Override
+    public void start(Stage stage) throws IOException {
+        // Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+        Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("LoginView.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 600, 400);
+
+        stage.setTitle("Messi");
+        stage.setScene(scene);
+        stage.show();
     }
 }

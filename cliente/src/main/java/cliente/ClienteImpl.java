@@ -1,6 +1,5 @@
 package cliente;
 
-import cliente.views.MainView;
 import shared.*;
 import shared.Utils.Color;
 
@@ -33,8 +32,6 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
-import com.vaadin.flow.component.UI;
-
 public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     static ClienteImpl instancia;
     static int puerto;
@@ -47,9 +44,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     Map<String, Amigo> amigos;
 
     KeyPair keys;
-
-    UI ui;
-    MainView view;
 
     class Amigo {
         String user;
@@ -133,29 +127,14 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         puerto = puerto_c;
         puerto_servidor = puerto_s;
         ip_servidor = ip_s;
+        log("cliente iniciado en el puerto " + puerto);
+        log("servidor: " + ip_servidor + ":" + puerto_servidor);
     }
 
     public static ClienteImpl get() throws RemoteException {
         if (instancia == null)
             instancia = new ClienteImpl();
         return instancia;
-    }
-
-    public void setUI(UI ui, MainView view) {
-        this.ui = ui;
-        this.view = view;
-
-        if (ui == null)
-            return;
-
-        ui.access(() -> {
-            Map<String, Amigo> conectados = getAmigosConectados();
-            view.actualizarClientes(conectados.keySet());
-            for (String user : conectados.keySet()) {
-                Amigo amigo = conectados.get(user);
-                view.actualizarMensajes(user, amigo.mensajes, amigo.secreto);
-            }
-        });
     }
 
     // Funciones de interfaz
@@ -182,13 +161,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                     break;
                 amigos.get(user).conectar(c);
 
-                // Actualizamos la vista
-                if (ui != null) {
-                    ui.access(() -> {
-                        view.actualizarClientes(getAmigosConectados().keySet());
-                    });
-                }
-
                 log(user + " se ha conectado");
                 break;
             }
@@ -196,13 +168,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                 String user = (String) o;
                 if (amigos.containsKey(user))
                     amigos.get(user).desconectar();
-
-                // Actualizamos la vista
-                if (ui != null) {
-                    ui.access(() -> {
-                        view.actualizarClientes(getAmigosConectados().keySet());
-                    });
-                }
 
                 log(user + " se ha desconectado");
                 break;
@@ -221,13 +186,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                         amigos.put(user, new Amigo(user));
                         amigos.get(user).conectar(c);
                     }
-                }
-
-                // Actualizamos la vista
-                if (ui != null) {
-                    ui.access(() -> {
-                        view.actualizarClientes(getAmigosConectados().keySet());
-                    });
                 }
 
                 // Mostramos los clientes conectados
@@ -261,13 +219,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             throw new RemoteException("el usuario " + user + " no existe");
 
         amigo.mensajes.add(msg);
-
-        // Actualizamos la vista
-        if (ui != null) {
-            ui.access(() -> {
-                view.actualizarMensajes(user, amigo.mensajes, amigo.secreto);
-            });
-        }
 
         String msg_str = " " + msg;
         if (msg.encriptado())
@@ -354,13 +305,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             amigo.mensajes.add(msg);
 
             amigo.conexion.recibir(this.user, msg);
-
-            // Actualizamos la vista
-            if (ui != null) {
-                ui.access(() -> {
-                    view.actualizarMensajes(user, amigo.mensajes, amigo.secreto);
-                });
-            }
 
         } catch (RemoteException e) {
             debug("no se ha podido enviar el mensaje a:" + user, Color.ROJO);

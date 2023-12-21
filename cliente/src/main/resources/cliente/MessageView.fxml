@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+
+<AnchorPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cliente.MessageView">
+   <children>
+      <SplitPane dividerPositions="0.25" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane>
+               <children>
+                  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label text="Nombre" styleClass="title-3" />
+                                 </children>
+                              </HBox>
+                              <Button text="Salir" />
+                           </children>
+                           <padding>
+                              <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                           </padding>
+                        </HBox>
+                        <Separator prefWidth="200.0" />
+                        <VBox spacing="8.0">
+                           <children>
+                              <Label text="Solicitudes" styleClass="title-3" />
+                              <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label text="Nombre" />
+                                       </children>
+                                    </HBox>
+                                    <Button mnemonicParsing="false" text="V" />
+                                    <Button mnemonicParsing="false" text="X" />
+                                 </children>
+                              </HBox>
+                           </children>
+                           <padding>
+                              <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                           </padding>
+                        </VBox>
+                        <Separator />
+                        <VBox spacing="8.0" VBox.vgrow="ALWAYS">
+                           <children>
+                              <Label text="Amigues" styleClass="title-3" />
+                              <ListView fx:id="userListView" VBox.vgrow="ALWAYS" />
+                           </children>
+                           <padding>
+                              <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                           </padding>
+                        </VBox>
+                        <Label fx:id="errorLabel" visible="false" style="-fx-text-fill: -color-danger-fg" />
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+          <AnchorPane>
+               <children>
+                  <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <center>
+                        <VBox spacing="8.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <HBox prefHeight="0.0" spacing="8.0">
+                                 <children>
+                                    <Circle fill="#218bff" radius="24.0" stroke="BLACK" strokeType="INSIDE" />
+                                    <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label text="User - 10:00" />
+                                          <Label text="Holi uwu este es un mensaje" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="0.0" spacing="8.0">
+                                 <children>
+                                    <VBox alignment="CENTER_RIGHT" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label text="User - 10:00" />
+                                          <Label text="Holi uwu este es un mensaje" />
+                                       </children>
+                                    </VBox>
+                                    <Circle fill="#4ac26b" radius="24.0" stroke="BLACK" strokeType="INSIDE" />
+                                 </children>
+                              </HBox>
+                           </children>
+                           <padding>
+                              <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                           </padding></VBox>
+                     </center>
+                     <bottom>
+                        <HBox spacing="8.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <TextField fx:id="messageInputField" promptText="Escribe aquí..." HBox.hgrow="ALWAYS" />
+                              <Button fx:id="sendButton" mnemonicParsing="false" text="Button" style="-fx-background-color: -color-accent-4; -fx-text-fill: -color-dark;" />
+                           </children>
+                           <padding>
+                              <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                           </padding>
+                        </HBox>
+                     </bottom>
+                  </BorderPane>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>

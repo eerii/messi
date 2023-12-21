@@ -8,10 +8,10 @@ if [ "$1" == "cliente" ]; then
     if [[ "$2" != *"-w"* ]]; then
         RUN="run"
     fi
-elif [ "$1" == "servidor" ]; then
+elif [[ "$1" == "servidor" || "$1" == "servidorweb" ]]; then
     APP="-p servidor"
 else
-    echo "Usage: $0 cliente|servidor [\"args\"] [http port]"
+    echo "Usage: $0 cliente|servidor(web) [\"args\"] [http port]"
     exit 1
 fi
 
@@ -21,7 +21,7 @@ fi
 
 CMD="$PORT ./gradlew $OPTS $APP"
 
-if [ "$1" == "servidorWeb" ]; then
+if [ "$1" == "servidorweb" ]; then
     xdg-open "http://localhost:8080/h2-console"
 fi
 

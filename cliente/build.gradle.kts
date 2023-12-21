@@ -12,30 +12,23 @@ plugins {
     id("com.vaadin") version "24.2.3"
     id("org.springframework.boot") version "3.0.2"
     id("io.spring.dependency-management") version "1.0.15.RELEASE"
+    id("org.openjfx.javafxplugin") version "0.0.13"
 }
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
-    maven(url = "https://maven.vaadin.com/vaadin-prereleases")
-    maven(url = "https://maven.vaadin.com/vaadin-addons")
 }
 
 dependencies {
     // This dependency is used by the application.
     implementation("com.google.guava:guava:32.1.1-jre")
 
-    // Vaadin
-    implementation(enforcedPlatform("com.vaadin:vaadin-bom:24.2.3"))
-    implementation("com.vaadin:vaadin-core")
-
-    // Spring boot
-    implementation("com.vaadin:vaadin-spring-boot-starter")
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-
     // Argument parser
     implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
+
+    // JavaFX
+    implementation("io.github.mkpaz:atlantafx-base:2.0.1")
 
     // Project
     implementation(project(":shared"))
@@ -55,6 +48,7 @@ application {
 
 defaultTasks("build")
 
-vaadin {
-
+javafx {
+    version = "17.0.6"
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.web", "javafx.swing")
 }

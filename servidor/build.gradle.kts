@@ -9,8 +9,8 @@ plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
 
-    id("org.springframework.boot") version "3.0.2"
-    id("io.spring.dependency-management") version "1.0.15.RELEASE"
+    id("org.springframework.boot") version "3.2.1"
+    id("io.spring.dependency-management") version "1.1.4"
 }
 
 repositories {
@@ -25,8 +25,10 @@ dependencies {
     // Spring boot
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.2.0")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("javax.persistence:javax.persistence-api:2.2")
+    implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
     
     // Argument parser
     implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
@@ -39,11 +41,8 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.16.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.0")
 
-
-
     // Project
     implementation(project(":shared"))
-    implementation(project(":cliente")) // Esto es para poder crear el bot desde el servidor
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
