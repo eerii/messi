@@ -52,7 +52,7 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
 
     @Override
     public void registrar(String user, String pass) throws RemoteException{
-        if (servicio.signup(user, pass))
+        if (!servicio.signup(user, pass))
             throw new RemoteException("el usuario " + user + " ya está registrado");
     }
 

@@ -1,7 +1,8 @@
 package cliente.views;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -24,10 +25,17 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 		setJustifyContentMode(JustifyContentMode.CENTER);
 
 		login.setAction("login");
+		login.setForgotPasswordButtonVisible(false);
 
 		add(new H1("Mess"));
-		add(new Span("Username: user, Password: password"));
 		add(login);
+
+		Button registerButton = new Button("Registrarse");
+		registerButton.addClickListener(event -> {
+			getUI().ifPresent(ui -> ui.navigate("register"));
+		});
+		registerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		add(registerButton);
 	}
 
 	@Override

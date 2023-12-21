@@ -145,6 +145,9 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         this.ui = ui;
         this.view = view;
 
+        if (ui == null)
+            return;
+
         ui.access(() -> {
             Map<String, Amigo> conectados = getAmigosConectados();
             view.actualizarClientes(conectados.keySet());

@@ -23,6 +23,7 @@ import java.time.Instant;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.html.*;
@@ -87,7 +88,7 @@ public class MainView extends HorizontalLayout {
         tabs.setOrientation(Orientation.VERTICAL);
         tabs.addClassNames(Flex.GROW, Flex.SHRINK, Overflow.HIDDEN);
 
-        /*Button logout = new Button(user, e -> {
+        Button logout = new Button("Cerrar sesión", e -> {
             security.logout();
             cliente.setUI(null, null);
             try {
@@ -95,17 +96,16 @@ public class MainView extends HorizontalLayout {
             } catch (RemoteException _e) {
             }
             cliente = null;
-        });*/
+        });
 
         Aside lateral = new Aside();
         lateral.addClassNames(Display.FLEX, FlexDirection.COLUMN, Flex.GROW_NONE, Flex.SHRINK_NONE,
                 Background.CONTRAST_5, Padding.MEDIUM);
-        lateral.add(titulo_lateral, search, tabs); //, logout);
+        lateral.add(titulo_lateral, search, tabs, logout);
         lateral.setWidth("18rem");
 
         // Contenido
         MessageInput input = new MessageInput();
-        // <theme-editor-local-classname>
         input.addClassName("main-view-message-input-1");
         input.addSubmitListener(submitEvent -> {
             String msg = submitEvent.getValue();
@@ -285,10 +285,9 @@ public class MainView extends HorizontalLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         if (cliente != null) {
-            cliente.setUI(null, null);
             try {
                 cliente.cerrarSesion();
-            } catch (RemoteException e) {
+            } catch (Exception e) {
             }
             cliente = null;
         }
