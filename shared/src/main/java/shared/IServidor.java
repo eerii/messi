@@ -65,5 +65,5 @@ public interface IServidor extends Remote, Serializable {
      * @param newPassword      Nueva contraseña del usuario
      * @throws RemoteException
      */
-    public void cambiarPassword(String user, String oldPassword, String newPassword) throws RemoteException;
+    public void cambiarClave(String user, String oldPassword, String newPassword) throws RemoteException;
 }

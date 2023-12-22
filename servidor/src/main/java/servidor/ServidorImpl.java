@@ -36,7 +36,6 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
         } catch (java.net.UnknownHostException e) {
             throw new RemoteException("error al obtener la ip");
         }
-
     }
 
     // getters
@@ -63,132 +62,127 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     }
 
     @Override
-    public void conectar(ICliente c, String user, String pass) throws RemoteException {
-        if (!servicio.existsUser(user))
-            throw new RemoteException("el usuario " + user + " no existe");
+    public void conectar(ICliente c, String usuario, String clave) throws RemoteException {
+        if (!servicio.existsUser(usuario))
+            throw new RemoteException("el usuario " + usuario + " no existe");
+        if (notificar(usuario, EventoConexion.PING, null))
+            throw new RemoteException("el usuario " + usuario + " ya está conectado");
+        if (!servicio.login(usuario, clave))
+            throw new RemoteException("contraseña del usuario " + usuario + " incorrecta" );
 
-        if (notificar(user, EventoConexion.PING, null))
-            throw new RemoteException("el usuario " + user + " ya está conectado");
+        usuarios.put(usuario, c);
+        log(usuario + " se ha conectado", Color.AZUL);
 
-        if (!servicio.login(user, pass))
-            throw new RemoteException("password del usuario " + user + " incorrecta" );
+        // Notificar a los usuarios que son sus amigues
+        notificarAmigues(usuario, EventoConexion.CLIENTE_CONECTADO, c);
 
-        usuarios.put(user, c);
-        log(user + " se ha conectado", Color.AZUL);
-
-        // Notificar a los usuarios que son sus amigos
-        notificarAmigos(user, EventoConexion.CLIENTE_CONECTADO, c);
-
-        // Notificar al nuevo cliente de la lista de sus amigos que están conectados
-        Set <ICliente> amigos = new HashSet<>();
-        getAmigosConectados(user).forEach(a -> amigos.add(usuarios.get(a)));
-        notificar(user, EventoConexion.LISTA_CLIENTES, amigos);
+        // Notificar al nuevo cliente de la lista de sus amigues que están conectados
+        Set <ICliente> amigues = new HashSet<>();
+        getAmiguesConectados(usuario).forEach(a -> amigues.add(usuarios.get(a)));
+        notificar(usuario, EventoConexion.LISTA_AMIGUES, amigues);
 
         // Notificar al cliente de las solicitudes de amistad pendientes
-        servicio.getSolicitudes(user).forEach(s ->
-            notificar(user, EventoConexion.SOLICITUD_AMISTAD, s));
+        servicio.getSolicitudes(usuario).forEach(s ->
+            notificar(usuario, EventoConexion.SOLICITUD_AMISTAD, s));
     }
 
     @Override
-    public void salir(String user) throws RemoteException {
-        if (!servicio.existsUser(user))
-            throw new RemoteException("el usuario " + user + " no existe");
-        if (!usuarios.containsKey(user))
-            throw new RemoteException("el usuario " + user + " no está conectado");
-        desconectar(user);
+    public void salir(String usuario) throws RemoteException {
+        if (!servicio.existsUser(usuario))
+            throw new RemoteException("el usuario " + usuario + " no existe");
+        if (!usuarios.containsKey(usuario))
+            throw new RemoteException("el usuario " + usuario + " no está conectado");
+        desconectar(usuario);
     }
 
-
     @Override
-    public void solicitarAmistad(String user, String amigo) throws RemoteException {
-        if (!servicio.existsUser(user))
-            throw new RemoteException("el usuario " + user + " no existe");
-        if (!servicio.existsUser(amigo))
-            throw new RemoteException("el usuario " + amigo + " no existe");
-        
+    public void solicitarAmistad(String usuario, String amigue) throws RemoteException {
+        if (!servicio.existsUser(usuario))
+            throw new RemoteException("el usuario " + usuario + " no existe");
+        if (!servicio.existsUser(amigue))
+            throw new RemoteException("el usuario " + amigue + " no existe");
         // * Gestionar seguridad
-        if (!usuarios.containsKey(user))
-            throw new RemoteException("el usuario " + user + " no está conectado");
+        if (!usuarios.containsKey(usuario))
+            throw new RemoteException("el usuario " + usuario + " no está conectado");
+        if(!servicio.addSolicitud(amigue, usuario))
+            throw new RemoteException("el usuario " + usuario + " ya es amigue del usuario " + amigue);
         
-        if(!servicio.addSolicitud(amigo, user))
-            throw new RemoteException("el usuario " + user + " ya es amigo del usuario " + amigo);
-        
-        log(user + " ha solicitado amistad a " + amigo, Color.AZUL);
-        notificar(amigo, EventoConexion.SOLICITUD_AMISTAD, user);
+        log(usuario + " ha solicitado amistad a " + amigue, Color.AZUL);
+        notificar(amigue, EventoConexion.SOLICITUD_AMISTAD, usuario);
     }
 
     @Override
-    public void responderSolicitud(String user, String amigo, boolean respuesta) throws RemoteException {
-        if (!servicio.existsUser(user))
-            throw new RemoteException("el usuario " + user + " no existe");
-        if (!servicio.existsUser(amigo))
-            throw new RemoteException("el usuario " + amigo + " no existe");
+    public void responderSolicitud(String usuario, String amigue, boolean respuesta) throws RemoteException {
+        if (!servicio.existsUser(usuario))
+            throw new RemoteException("el usuario " + usuario + " no existe");
+        if (!servicio.existsUser(amigue))
+            throw new RemoteException("el usuario " + amigue + " no existe");
         // * Gestionar seguridad
-        if (!usuarios.containsKey(user))
-            throw new RemoteException("el usuario " + user + " no está conectado");
-        if (servicio.replySolicitud(user, amigo, respuesta))
-            throw new RemoteException("no hay ninguna solicitud de amistad de " + amigo + " a " + user);
+        if (!usuarios.containsKey(usuario)) {
+            log("no se puede responder, el usuario " + usuario + " no está conectado", Color.ROJO);
+            //TODO: throw new RemoteException("el usuario " + usuario + " no está conectado");
+            return;
+        }
+        if (servicio.replySolicitud(usuario, amigue, respuesta))
+            throw new RemoteException("no hay ninguna solicitud de amistad de " + amigue + " a " + usuario);
 
         if (respuesta){
-            log(user + " y " + amigo + " ahora son amigos", Color.AZUL);
-            notificar(amigo, EventoConexion.CLIENTE_CONECTADO, user);
-            notificar(user, EventoConexion.CLIENTE_CONECTADO, amigo);
+            log(usuario + " y " + amigue + " ahora son amigues", Color.AZUL);
+            notificar(amigue, EventoConexion.CLIENTE_CONECTADO, usuario);
+            notificar(usuario, EventoConexion.CLIENTE_CONECTADO, amigue);
         }
     }
 
     @Override
-    public void cambiarPassword(String user, String oldPassword, String newPassword) throws RemoteException{
+    public void cambiarClave(String user, String antigua, String nueva) throws RemoteException{
         if (!servicio.existsUser(user))
             throw new RemoteException("el usuario " + user + " no existe");
         // * Gestionar seguridad
         if (!usuarios.containsKey(user))
             throw new RemoteException("el usuario " + user + " no está conectado");
             
-        servicio.changePassword(user, oldPassword, newPassword);
+        servicio.changePassword(user, antigua, nueva);
     }
 
     // Funciones propias
 
-    void desconectar(String user) {
+    void desconectar(String usuario) {
         // Eliminar la conexión
-        if (usuarios.containsKey(user)) {
-            log(user + " se ha desconectado", Color.AZUL);
-            usuarios.remove(user);
+        if (usuarios.containsKey(usuario)) {
+            log(usuario + " se ha desconectado", Color.AZUL);
+            usuarios.remove(usuario);
         }
-        // Notificar a sus amigos
-        notificarAmigos(user, EventoConexion.CLIENTE_DESCONECTADO, user);
+        // Notificar a sus amigues
+        notificarAmigues(usuario, EventoConexion.CLIENTE_DESCONECTADO, usuario);
     }
 
-    void notificarAmigos(String user, EventoConexion e, Object o){
-        Set<String> amigosConectados = getAmigosConectados(user);
-        amigosConectados.forEach(amigo -> notificar(amigo, e, o));
+    void notificarAmigues(String usuario, EventoConexion e, Object o){
+        Set<String> amiguesConectados = getAmiguesConectados(usuario);
+        amiguesConectados.forEach(amigue -> notificar(amigue, e, o));
     }
 
-    Set<String> getAmigosConectados(String user){
-        Set<String> amigosConectados = servicio.getAmigos(user);
-        amigosConectados.retainAll(usuarios.keySet());
-        return amigosConectados;
+    Set<String> getAmiguesConectados(String usuario){
+        Set<String> amiguesConectados = servicio.getAmigos(usuario);
+        amiguesConectados.retainAll(usuarios.keySet());
+        return amiguesConectados;
     }
 
-    
-
-    boolean notificar (String user, EventoConexion e, Object o){
-        if (!usuarios.containsKey(user))
+    boolean notificar (String usuario, EventoConexion e, Object o){
+        if (!usuarios.containsKey(usuario))
             return false;
-        debug("notificando a  " + user + ": " + e, Color.AZUL);
+        debug("mandando " + e + " a '" + usuario + "'", Color.AZUL);
         try {
-            usuarios.get(user).notificar(e, o);
-            debug(user + " ha sido notificado: " + e, Color.AZUL);
+            usuarios.get(usuario).notificar(e, o);
             return true;
-        } catch (ConnectException ex ) {
-            desconectar(user);
-            debug(user + " no está conectado" + e, Color.ROJO);
-            //log(ex.getMessage(), Color.ROJO);
+        } catch (ConnectException ex) {
+            desconectar(usuario);
+            debug("'" + usuario + "' no está conectado" + e, Color.ROJO);
+            log(ex.getMessage(), Color.ROJO);
             return false;
         } catch (RemoteException ex){
-            desconectar(user);
-            debug("Fallo notificando a  " + user + " de: " + e, Color.ROJO);
-            //log(ex.getMessage(), Color.ROJO);
+            desconectar(usuario);
+            debug("fallo notificando a '" + usuario + "' de: " + e, Color.ROJO);
+            log(ex.getMessage(), Color.ROJO);
             return false;
         }
     }

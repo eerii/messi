@@ -17,10 +17,10 @@
                            <children>
                               <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                                  <children>
-                                    <Label text="Nombre" styleClass="title-3" />
+                                    <Label fx:id="textoNombre" text="Nombre" styleClass="title-3" />
                                  </children>
                               </HBox>
-                              <Button text="Salir" />
+                              <Button onAction="#botonSalir" text="Salir" />
                            </children>
                            <padding>
                               <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
@@ -50,13 +50,13 @@
                         <VBox spacing="8.0" VBox.vgrow="ALWAYS">
                            <children>
                               <Label text="Amigues" styleClass="title-3" />
-                              <ListView fx:id="userListView" VBox.vgrow="ALWAYS" />
+                              <ListView fx:id="listaAmigues" VBox.vgrow="ALWAYS" />
                            </children>
                            <padding>
                               <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                            </padding>
                         </VBox>
-                        <Label fx:id="errorLabel" visible="false" style="-fx-text-fill: -color-danger-fg" />
+                        <Label fx:id="textoError" visible="false" style="-fx-text-fill: -color-danger-fg" />
                      </children>
                   </VBox>
                </children>
@@ -97,8 +97,8 @@
                      <bottom>
                         <HBox spacing="8.0" BorderPane.alignment="CENTER">
                            <children>
-                              <TextField fx:id="messageInputField" promptText="Escribe aquí..." HBox.hgrow="ALWAYS" />
-                              <Button fx:id="sendButton" mnemonicParsing="false" text="Button" style="-fx-background-color: -color-accent-4; -fx-text-fill: -color-dark;" />
+                              <TextField fx:id="campoEntradaMensaje" onAction="#botonEnviar" promptText="Escribe aquí..." HBox.hgrow="ALWAYS" />
+                              <Button onAction="#botonEnviar" mnemonicParsing="false" text="Button" style="-fx-background-color: -color-accent-4; -fx-text-fill: -color-dark;" />
                            </children>
                            <padding>
                               <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />

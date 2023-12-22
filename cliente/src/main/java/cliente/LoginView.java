@@ -10,29 +10,28 @@ import javafx.scene.control.TextField;
 public class LoginView {
 
     @FXML
-    private TextField usernameField;
+    private TextField campoUsuario;
 
     @FXML
-    private PasswordField passwordField;
+    private PasswordField campoClave;
 
     @FXML
-    private Label errorLabel;
+    private Label textoError;
 
-    public void handleLoginButtonAction() {
-        String username = usernameField.getText();
-        String password = passwordField.getText();        
+    public void botonInicioSesion() {
+        String u = campoUsuario.getText();
+        String c = campoClave.getText();        
 
         try {
-            ClienteImpl cliente = ClienteImpl.get();
-            cliente.iniciarSesion(username, password);
-            Utils.changeScene("MessageView.fxml", errorLabel, this.getClass());
+            ClienteImpl.get().iniciarSesion(u, c);
+            Utils.changeScene("MessageView.fxml", textoError, this.getClass());
         } catch (RemoteException e) {
-            errorLabel.setText("Error iniciando sesión: " + e.getMessage());
-            errorLabel.setVisible(true);
+            textoError.setText("Error iniciando sesión: " + e.getMessage());
+            textoError.setVisible(true);
         }
     }
 
-    public void handleGoToRegisterButtonAction() {
-        Utils.changeScene("RegisterView.fxml", errorLabel, this.getClass());
+    public void botonIrRegistrar() {
+        Utils.changeScene("RegisterView.fxml", textoError, this.getClass());
     }
 }

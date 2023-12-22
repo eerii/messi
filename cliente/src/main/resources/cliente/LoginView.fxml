@@ -7,13 +7,13 @@
     <VBox alignment="CENTER_LEFT" spacing="15" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="40.0">
         <Label text="Iniciar Sesión" styleClass="title-2" />
         <Label text="Usuario:" />
-        <TextField fx:id="usernameField" />
+        <TextField fx:id="campoUsuario" />
         <Label text="Contraseña:" />
-        <PasswordField fx:id="passwordField" />
+        <PasswordField fx:id="campoClave" />
         <HBox spacing="10">
-            <Button onAction="#handleLoginButtonAction" text="Iniciar Sesión" />
-            <Button onAction="#handleGoToRegisterButtonAction" text="Ir a Registrarse" />
+            <Button onAction="#botonInicioSesion" text="Iniciar Sesión" />
+            <Button onAction="#botonIrRegistrar" text="Ir a Registrarse" />
         </HBox>
-        <Label fx:id="errorLabel" visible="false" style="-fx-text-fill: -color-danger-fg" />
+        <Label fx:id="textoError" visible="false" style="-fx-text-fill: -color-danger-fg" />
     </VBox>
 </AnchorPane>

@@ -3,7 +3,9 @@ package shared;
 public enum EventoConexion {
     CLIENTE_CONECTADO,
     CLIENTE_DESCONECTADO,
-    LISTA_CLIENTES,
+    LISTA_AMIGUES,
     SOLICITUD_AMISTAD,
     PING,
+    MENSAJE_ENVIADO,
+    MENSAJE_RECIBIDO,
 }

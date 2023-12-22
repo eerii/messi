@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 import atlantafx.base.theme.PrimerDark;
 
@@ -38,6 +39,9 @@ public class App extends Application {
         parser.addArgument("-u", "--user")
                 .help("Nombre de usuario");
 
+        parser.addArgument("-p", "--pass")
+                .help("Contraseña");
+
         Namespace ns = null;
         try {
             ns = parser.parseArgs(args);
@@ -57,6 +61,15 @@ public class App extends Application {
             System.exit(2);
         }
 
+        if (ns.getString("user") != null && ns.getString("pass") != null) {
+            try {
+                ClienteImpl.get().iniciarSesion(ns.getString("user"), ns.getString("pass"));
+            } catch (RemoteException e) {
+                System.out.println("[C]: error iniciando sesión " + e.getMessage());
+                System.exit(3);
+            }
+        }
+
         // Lanzamos JavaFX
         launch();
     }
@@ -66,7 +79,10 @@ public class App extends Application {
         // Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
 
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("LoginView.fxml"));
+        boolean conectado = ClienteImpl.get().getUsuario() != null;
+        String view = conectado ? "MessageView.fxml" : "LoginView.fxml";
+
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(view));
         Scene scene = new Scene(fxmlLoader.load(), 600, 400);
 
         stage.setTitle("Messi");

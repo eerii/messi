@@ -7,39 +7,38 @@ import javafx.scene.control.TextField;
 
 public class RegisterView {
     @FXML
-    private TextField usernameField;
+    private TextField campoUsuario;
 
     @FXML
-    private PasswordField passwordField;
+    private PasswordField campoClave;
 
     @FXML
-    private PasswordField confirmPasswordField;
+    private PasswordField campoConfirmarClave;
 
     @FXML
-    private Label errorLabel;
+    private Label textoError;
 
-    public void handleRegisterButtonAction() {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
-        String confirmPassword = confirmPasswordField.getText();
+    public void botonRegistrar() {
+        String u = campoUsuario.getText();
+        String c = campoClave.getText();
+        String cc = campoConfirmarClave.getText();
 
-        if (!password.equals(confirmPassword)) {
-            errorLabel.setText("Las contraseñas no coinciden");
-            errorLabel.setVisible(true);
+        if (!c.equals(cc)) {
+            textoError.setText("Las contraseñas no coinciden");
+            textoError.setVisible(true);
             return;
         }
 
         try {
-            ClienteImpl cliente = ClienteImpl.get();
-            cliente.registrarse(username, password);
-            Utils.changeScene("LoginView.fxml", errorLabel, this.getClass());
+            ClienteImpl.get().registrar(u, c);
+            Utils.changeScene("LoginView.fxml", textoError, this.getClass());
         } catch (Exception e) {
-            errorLabel.setText("Error registrando usuario: " + e.getMessage());
-            errorLabel.setVisible(true);
+            textoError.setText("Error registrando usuario: " + e.getMessage());
+            textoError.setVisible(true);
         }
     }
 
-    public void handleGoToLoginButtonAction() {
-        Utils.changeScene("LoginView.fxml", errorLabel, this.getClass());
+    public void botonIrInicioSesion() {
+        Utils.changeScene("LoginView.fxml", textoError, this.getClass());
     }
 }

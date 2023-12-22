@@ -74,7 +74,7 @@ public class App {
             c.iniciarSesion("heybot");
 
             while (true) {
-                for (String u : c.getAmigosConectados().keySet()) {
+                for (String u : c.getAmiguesConectados().keySet()) {
                     if (u.equals(user))
                         continue;
                     try {

@@ -23,7 +23,7 @@ public interface ICliente extends Remote, Serializable {
      * @return Nombre del usuario
      * @throws RemoteException
      */
-    public String getUsername() throws RemoteException;
+    public String getUsuario() throws RemoteException;
     
     /**
      * Recibe un mensaje de otro cliente
