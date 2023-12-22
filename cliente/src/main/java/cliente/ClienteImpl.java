@@ -61,6 +61,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         List<Mensaje> mensajes;
         ICliente conexion;
         SecretKey secreto;
+        String emojis;
 
         Amigue(String user) {
             this.mensajes = new ArrayList<>();
@@ -106,7 +107,8 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
 
                 byte[] sec = agree.generateSecret();
                 sec = Arrays.copyOf(sec, 16); // Usamos solo los primeros 128 bits (AES)
-                debug("secreto generado con " + this.usuario + ": " + emojiFromHex(bytesToHex(sec)));
+                this.emojis = emojiFromHex(bytesToHex(sec));
+                debug("secreto generado con " + this.usuario + ": " + emojis);
 
                 this.secreto = new SecretKeySpec(sec, "AES");
             } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException e) {

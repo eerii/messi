@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
 
 <AnchorPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cliente.MessageView">
    <children>
@@ -60,6 +61,16 @@
           <AnchorPane>
                <children>
                   <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <top>
+                        <HBox spacing="8.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <Label fx:id="textoNombreChat" text="Nombre" styleClass="title-3" visible="false" />
+                           </children>
+                           <padding>
+                              <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
+                           </padding>
+                        </HBox>
+                     </top>
                      <center>
                         <VBox fx:id="listaChat" spacing="8.0" BorderPane.alignment="CENTER">
                            <padding>

@@ -19,6 +19,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import shared.EventoConexion;
 import shared.IObserver;
 import shared.Mensaje;
@@ -78,6 +80,9 @@ public class MessageView implements IObserver {
     private TextField campoEntradaMensaje;
 
     @FXML
+    private Label textoNombreChat;
+
+    @FXML
     private Label textoError;
 
     @FXML
@@ -102,6 +107,9 @@ public class MessageView implements IObserver {
                 if (mensajes.containsKey(nueva.nombre)) {
                     mensajes.get(nueva.nombre).forEach(m -> dibujarMensaje(m));
                 }
+
+                textoNombreChat.setText(nueva.nombre);
+                textoNombreChat.setVisible(true);
             }
         });
         c.pendientes();
