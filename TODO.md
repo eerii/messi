@@ -87,8 +87,9 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
       - [ ] Servidor fijo para probar
 
   - ==Ultimos detalles==
-  - [ ] Funciona entre dos ordenadores distintos
+  - [x] Funciona entre dos ordenadores distintos
   - [ ] Encriptar contraseña cliente-servidor
+  - [ ] Mostrar emojis y cambio de claves
   - [ ] Arreglar notificacion de mensajes pendientes por leer
     - Actualmente solo sale la notificación una vez entras al chat donde tenías mensajes pendientes, y ya no se va.
   - [ ] Si no se se selecciona un chat, que no se vea la barra de enviar mensajes

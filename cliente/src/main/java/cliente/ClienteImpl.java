@@ -31,6 +31,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import javax.crypto.NoSuchPaddingException;
+
+import java.util.Base64;
+
+import javax.crypto.Cipher;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     static ClienteImpl instancia;
@@ -44,6 +51,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     Map<String, Amigue> amigues;
 
     KeyPair keys;
+    SecretKey encriptarClave;
 
     List<IObserver> observadores = new ArrayList<>();
     List<String> solicitudes = new ArrayList<>();
@@ -134,6 +142,15 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             debug("llaves de encriptación generadas:");
             debug("  llave pública: " + printKey(keys.getPublic().getEncoded()));
             debug("  llave privada: " + printKey(keys.getPrivate().getEncoded()));
+
+            // Llave para encriptar la contraseña (misma para todos los usuarios)
+            // Cargar de .env
+            Properties env = new Properties();
+            try (FileInputStream fis = new FileInputStream(".env")) {
+                env.load(fis);
+            }
+            byte[] decodedKey = Base64.getDecoder().decode(env.getProperty("secretKey"));
+            encriptarClave = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
         } catch (Exception e) {
             throw new RemoteException("error al generar las llaves de encriptación");
         }
@@ -283,9 +300,11 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     public void registrar(String usuario, String clave) throws RemoteException{
         if (servidor == null)
             conectarServidor();
-        
-        servidor.registrar(usuario, clave);
+
+        String claveEncriptada = encriptarClaveUsuario(usuario, clave);
         this.usuario = usuario;
+        
+        servidor.registrar(usuario, claveEncriptada);
 
         log("cliente registrado en el servidor " + ip_servidor + ":" + puerto_servidor);
     }
@@ -293,15 +312,32 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     public void iniciarSesion(String usuario, String clave) throws RemoteException {
         if (servidor == null)
             conectarServidor();
-        
+
+        String claveEncriptada = encriptarClaveUsuario(usuario, clave);
         this.usuario = usuario;
-        servidor.conectar((ICliente) this, usuario, clave);
+
+        servidor.conectar((ICliente) this, usuario, claveEncriptada);
 
         log("cliente conectado al servidor " + ip_servidor + ":" + puerto_servidor);
     }
 
+    public String encriptarClaveUsuario(String usuario, String clave) {
+        String pass = "";
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, encriptarClave);
+            byte[] encriptado = cipher.doFinal(clave.getBytes());
+            pass = Base64.getEncoder().encodeToString(encriptado);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
+        }
+        return pass;
+    }
+
     public void cerrarSesion() throws RemoteException {
-        servidor.salir(usuario);
+        if (servidor != null)
+            servidor.salir(usuario);
+
         this.servidor = null;
         this.usuario = null;
 
