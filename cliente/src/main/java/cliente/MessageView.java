@@ -95,6 +95,7 @@ public class MessageView implements IObserver {
         listaAmigues.getSelectionModel().selectedItemProperty().addListener((obs, antigua, nueva) -> {
             if (nueva != null) {
                 chatActual = nueva.nombre;
+                nueva.notificacion = false;
 
                 listaChat.getChildren().clear();
 
@@ -232,10 +233,13 @@ public class MessageView implements IObserver {
         if (chatActual.equals(msg.usuario)) {
             dibujarMensaje(msg);
         } else {
-            ItemListaAmigues i = new ItemListaAmigues(msg.usuario);
-            if (listaAmigues.getItems().contains(i)) {
-                listaAmigues.getItems().get(listaAmigues.getItems().indexOf(i)).notificacion = true;
-            }
+            Platform.runLater(() -> {
+                ItemListaAmigues i = new ItemListaAmigues(msg.usuario);
+                if (listaAmigues.getItems().contains(i)) {
+                    listaAmigues.getItems().get(listaAmigues.getItems().indexOf(i)).notificacion = true;
+                }
+                listaAmigues.refresh();
+            });
         }
     }
 
