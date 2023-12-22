@@ -2,10 +2,16 @@ package cliente;
 
 import java.rmi.RemoteException;
 
+import cliente.ClienteImpl.MensajeDesencriptado;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import shared.EventoConexion;
 import shared.IObserver;
 import shared.Mensaje;
@@ -18,6 +24,9 @@ public class MessageView implements IObserver {
 
     @FXML
     private ListView<String> listaAmigues;
+
+    @FXML
+    private VBox listaChat;
 
     @FXML
     private TextField campoEntradaMensaje;
@@ -89,12 +98,36 @@ public class MessageView implements IObserver {
                 // TODO:
                 break;
             case MENSAJE_ENVIADO:
-                // TODO:
+                nuevoMensaje((MensajeDesencriptado) o, false);
                 break;
             case MENSAJE_RECIBIDO:
-                // TODO:
+                nuevoMensaje((MensajeDesencriptado) o, true);
                 break;
             default:
         }
+    }
+
+    private void nuevoMensaje(MensajeDesencriptado msg, boolean esRecibido) {
+        Circle avatar = new Circle();
+        avatar.setRadius(24.0);
+        avatar.setFill(esRecibido ? Color.web("#218bff") : Color.web("#4ac26b"));
+
+        Label textNombre = new Label(msg.usuario + " - " + msg.hora);
+        Label textoMensaje = new Label(msg.mensaje);
+        textoMensaje.setWrapText(true);
+
+        VBox cajaContenido = new VBox();
+        cajaContenido.setAlignment(esRecibido ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
+        cajaContenido.getChildren().addAll(textNombre, textoMensaje);
+
+        HBox cajaMensaje = new HBox();
+        cajaMensaje.setSpacing(8.0);
+        if (esRecibido) {
+            cajaMensaje.getChildren().addAll(avatar, cajaContenido);
+        } else {
+            cajaMensaje.getChildren().addAll(cajaContenido, avatar);
+        }
+
+        listaChat.getChildren().add(cajaMensaje);
     }
 }

@@ -5,9 +5,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
@@ -29,12 +27,12 @@ public class Mensaje implements Serializable {
         this.encriptado = false;
     }
 
-    public String hora() {
+    public String getHora() {
         return hora.format(Utils.fmt);
     }
 
-    public Instant instant() {
-        return hora.toInstant(ZoneOffset.UTC);
+    public String getUsuario() {
+        return user;
     }
 
     public void setUsuario(String user) {
@@ -54,10 +52,6 @@ public class Mensaje implements Serializable {
         cipher.init(Cipher.DECRYPT_MODE, key);
         byte[] bytes = Base64.getDecoder().decode(msg);
         return new String(cipher.doFinal(bytes), StandardCharsets.UTF_8);
-    }
-
-    public String getUsuario() {
-        return user;
     }
 
     public boolean encriptado() {

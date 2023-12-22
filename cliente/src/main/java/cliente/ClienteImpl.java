@@ -106,6 +106,18 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         }
     }
 
+    class MensajeDesencriptado {
+        String usuario;
+        String mensaje;
+        String hora;
+
+        MensajeDesencriptado(String usuario, String mensaje, String hora) {
+            this.usuario = usuario;
+            this.mensaje = mensaje;
+            this.hora = hora;
+        }
+    }
+
     ClienteImpl() throws RemoteException {
         super(puerto);
         this.amigues = new HashMap<>();
@@ -223,25 +235,28 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     }
 
     @Override
-    public void recibir(String usuario, Mensaje clave) throws RemoteException {
-        if (!clave.encriptado()) {
+    public void recibir(String usuario, Mensaje msg) throws RemoteException {
+        if (!msg.encriptado()) {
             debug("mensaje sin encriptar recibido de " + usuario + "!", Color.ROJO);
         }
 
         Amigue amigue = amigues.get(usuario);
         if (amigue == null)
             throw new RemoteException("el usuario " + usuario + " no existe");
+        amigue.mensajes.add(msg);
 
-        amigue.mensajes.add(clave);
+        MensajeDesencriptado msg_des = new MensajeDesencriptado(usuario, msg.toString() + " ", msg.getHora());
 
-        String msg_str = " " + clave;
-        if (clave.encriptado())
+        if (msg.encriptado())
             try {
-                msg_str = " " + clave.desencriptar(amigue.secreto);
+                msg_des.mensaje = msg.desencriptar(amigue.secreto) + " ";
             } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-                msg_str = "Error al desencriptar";
+                msg_des.mensaje = "Error al desencriptar";
             }
-        log("mensaje recibido de " + usuario + ": " + msg_str);
+        log("mensaje recibido de " + usuario + ": " + msg_des.mensaje);
+
+        // Añadimos a la interfaz
+        notificarObservadores(EventoConexion.MENSAJE_RECIBIDO, msg_des);
     }
 
     @Override
