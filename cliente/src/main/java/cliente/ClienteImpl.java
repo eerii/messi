@@ -386,7 +386,9 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     }
 
     public void cambiarClave(String oldPassword, String newPassword) throws RemoteException{
-        servidor.cambiarClave(usuario, oldPassword, newPassword);
+        String claveEncriptada = encriptarClaveUsuario(usuario, oldPassword);
+        String claveEncriptadaNueva = encriptarClaveUsuario(usuario, newPassword);
+        servidor.cambiarClave(usuario, claveEncriptada, claveEncriptadaNueva);
     }
 
     public Map<String, Amigue> getAmiguesConectados() {

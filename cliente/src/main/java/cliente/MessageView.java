@@ -142,6 +142,11 @@ public class MessageView implements IObserver {
     }
 
     @FXML
+    public void botonCambiarClave() {
+        Utils.changeScene("CambiarClaveView.fxml", textoError, this.getClass());
+    }
+
+    @FXML
     public void botonSolicitud() {
         String amigue = campoEntradaSolicitud.getText();
         campoEntradaSolicitud.clear();

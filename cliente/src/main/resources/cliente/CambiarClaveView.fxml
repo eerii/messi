@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cliente.CambiarClaveView">
+    <VBox alignment="CENTER_LEFT" spacing="15" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="40.0">
+        <Label text="Cambiar contraseña" styleClass="title-2" />
+        <Label text="Contraseña antigua:" />
+        <PasswordField fx:id="campoClaveAntigua" />
+        <Label text="Nueva contraseña:" />
+        <PasswordField fx:id="campoClave" />
+        <Label text="Confirmar contraseña:" />
+        <PasswordField fx:id="campoConfirmarClave" />
+        <HBox spacing="10">
+            <Button onAction="#botonCambio" text="Cambiar" />
+            <Button onAction="#botonVolver" text="Volver" />
+        </HBox>
+        <Label fx:id="textoError" visible="false" style="-fx-text-fill: -color-danger-fg" />
+    </VBox>
+</AnchorPane>
