@@ -89,4 +89,11 @@ public class App extends Application {
         stage.setScene(scene);
         stage.show();
     }
+
+    @Override
+    public void stop() throws Exception {
+        ClienteImpl.get().cerrarSesion();
+        super.stop();
+        System.exit(0);
+    }
 }

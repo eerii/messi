@@ -27,18 +27,13 @@
                            </padding>
                         </HBox>
                         <Separator prefWidth="200.0" />
-                        <VBox spacing="8.0">
+                        <VBox fx:id="listaSolicitudes" spacing="8.0">
                            <children>
                               <Label text="Solicitudes" styleClass="title-3" />
-                              <HBox alignment="CENTER_LEFT" spacing="8.0">
+                              <HBox spacing="8.0">
                                  <children>
-                                    <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                                       <children>
-                                          <Label text="Nombre" />
-                                       </children>
-                                    </HBox>
-                                    <Button mnemonicParsing="false" text="V" />
-                                    <Button mnemonicParsing="false" text="X" />
+                                    <TextField fx:id="campoEntradaSolicitud" onAction="#botonSolicitud" HBox.hgrow="ALWAYS" promptText="Nuevo amigo..." />
+                                    <Button text="+" onAction="#botonSolicitud" />
                                  </children>
                               </HBox>
                            </children>
@@ -67,7 +62,7 @@
                      <center>
                         <VBox fx:id="listaChat" spacing="8.0" BorderPane.alignment="CENTER">
                            <padding>
-                              <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                              <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
                            </padding>
                         </VBox>
                      </center>
@@ -78,7 +73,7 @@
                               <Button onAction="#botonEnviar" mnemonicParsing="false" text="Button" style="-fx-background-color: -color-accent-4; -fx-text-fill: -color-dark;" />
                            </children>
                            <padding>
-                              <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                              <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
                            </padding>
                         </HBox>
                      </bottom>

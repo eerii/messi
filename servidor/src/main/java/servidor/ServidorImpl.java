@@ -128,8 +128,11 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
 
         if (respuesta){
             log(usuario + " y " + amigue + " ahora son amigues", Color.AZUL);
-            notificar(amigue, EventoConexion.CLIENTE_CONECTADO, usuario);
-            notificar(usuario, EventoConexion.CLIENTE_CONECTADO, amigue);
+            // Notificar solo si el usuario está conectado
+            if (usuarios.containsKey(amigue) && usuarios.containsKey(usuario)) {
+                notificar(amigue, EventoConexion.CLIENTE_CONECTADO, usuarios.get(usuario));
+                notificar(usuario, EventoConexion.CLIENTE_CONECTADO, usuarios.get(amigue));
+            }
         }
     }
 

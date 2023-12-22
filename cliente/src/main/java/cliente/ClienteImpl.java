@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -110,11 +109,13 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         String usuario;
         String mensaje;
         String hora;
+        boolean recibido;
 
-        MensajeDesencriptado(String usuario, String mensaje, String hora) {
+        MensajeDesencriptado(String usuario, String mensaje, String hora, boolean recibido) {
             this.usuario = usuario;
             this.mensaje = mensaje;
             this.hora = hora;
+            this.recibido = recibido;
         }
     }
 
@@ -156,8 +157,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
 
     @Override
     public String getUsuario() throws RemoteException{
-        if (usuario == null)
-            throw new ConnectException("el usuario no está conectado");
         return usuario;
     }
 
@@ -245,7 +244,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             throw new RemoteException("el usuario " + usuario + " no existe");
         amigue.mensajes.add(msg);
 
-        MensajeDesencriptado msg_des = new MensajeDesencriptado(usuario, msg.toString() + " ", msg.getHora());
+        MensajeDesencriptado msg_des = new MensajeDesencriptado(usuario, msg.toString() + " ", msg.getHora(), true);
 
         if (msg.encriptado())
             try {
@@ -309,7 +308,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             msg.setUsuario(this.usuario);
 
             // Añadimos a la interfaz
-            MensajeDesencriptado msg_des = new MensajeDesencriptado(this.usuario, msg.toString(), msg.getHora());
+            MensajeDesencriptado msg_des = new MensajeDesencriptado(usuario, msg.toString(), msg.getHora(), false);
             notificarObservadores(EventoConexion.MENSAJE_ENVIADO, msg_des);
 
             try {
@@ -336,6 +335,14 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         }
     }
 
+    public void enviarSolicitud(String amigue) throws RemoteException {
+        servidor.solicitarAmistad(usuario, amigue);
+    }
+
+    public void responderSolicitud(String amigue, boolean respuesta) throws RemoteException {
+        servidor.responderSolicitud(usuario, amigue, respuesta);
+    }
+
     public void cambiarClave(String oldPassword, String newPassword) throws RemoteException{
         servidor.cambiarClave(usuario, oldPassword, newPassword);
     }
@@ -344,6 +351,14 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         return amigues.entrySet().stream()
                 .filter(e -> e.getValue().conexion != null)
                 .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+    }
+
+    public List<MensajeDesencriptado> getMensajes(String usuario) {
+        if (!amigues.containsKey(usuario))
+            return new ArrayList<>();
+        return amigues.get(usuario).mensajes.stream()
+                .map(m -> new MensajeDesencriptado(usuario, m.toString(), m.getHora(), m.getUsuario().equals(usuario)))
+                .collect(Collectors.toList());
     }
 
     // Observadores
