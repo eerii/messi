@@ -28,6 +28,7 @@ public class MessageView implements IObserver {
     String chatActual;
     Map<String, List<MensajeDesencriptado>> mensajes = new HashMap<>();
 
+
     class ItemListaAmigues {
         String nombre;
         boolean notificacion;
@@ -102,6 +103,7 @@ public class MessageView implements IObserver {
                 }
             }
         });
+        c.pendientes();
     }
 
     @FXML
@@ -259,6 +261,7 @@ public class MessageView implements IObserver {
 
     void dibujarSolicitud(String amigue) {
         Label textoNombre = new Label(amigue);
+        HBox cajaSolicitud = new HBox();
 
         HBox cajaNombre = new HBox();
         HBox.setHgrow(cajaNombre, Priority.ALWAYS);
@@ -268,7 +271,7 @@ public class MessageView implements IObserver {
         botonAceptar.setOnAction(event -> {
             try {
                 ClienteImpl.get().responderSolicitud(amigue, true);
-                Platform.runLater(() -> listaSolicitudes.getChildren().remove(textoNombre.getParent()));
+                Platform.runLater(() -> listaSolicitudes.getChildren().remove(cajaSolicitud));
 
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -279,13 +282,12 @@ public class MessageView implements IObserver {
         botonRechazar.setOnAction(event -> {
             try {
                 ClienteImpl.get().responderSolicitud(amigue, false);
-                Platform.runLater(() -> listaSolicitudes.getChildren().remove(textoNombre.getParent()));
+                Platform.runLater(() -> listaSolicitudes.getChildren().remove(cajaSolicitud));
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
         });
 
-        HBox cajaSolicitud = new HBox();
         cajaSolicitud.setSpacing(8.0);
         cajaSolicitud.setAlignment(Pos.CENTER_LEFT);
         cajaSolicitud.getChildren().addAll(cajaNombre, botonAceptar, botonRechazar);

@@ -117,13 +117,12 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
             throw new RemoteException("el usuario " + usuario + " no existe");
         if (!servicio.existsUser(amigue))
             throw new RemoteException("el usuario " + amigue + " no existe");
-        // * Gestionar seguridad
         if (!usuarios.containsKey(usuario)) {
             log("no se puede responder, el usuario " + usuario + " no está conectado", Color.ROJO);
-            //TODO: throw new RemoteException("el usuario " + usuario + " no está conectado");
+            //throw new RemoteException("el usuario " + usuario + " no está conectado");
             return;
         }
-        if (servicio.replySolicitud(usuario, amigue, respuesta))
+        if (!servicio.replySolicitud(usuario, amigue, respuesta))
             throw new RemoteException("no hay ninguna solicitud de amistad de " + amigue + " a " + usuario);
 
         if (respuesta){
@@ -140,11 +139,25 @@ public class ServidorImpl extends UnicastRemoteObject implements IServidor {
     public void cambiarClave(String user, String antigua, String nueva) throws RemoteException{
         if (!servicio.existsUser(user))
             throw new RemoteException("el usuario " + user + " no existe");
-        // * Gestionar seguridad
         if (!usuarios.containsKey(user))
             throw new RemoteException("el usuario " + user + " no está conectado");
             
         servicio.changePassword(user, antigua, nueva);
+    }
+
+    @Override
+    public void eliminarAmigo(String user, String antiguoAmigo) throws RemoteException{
+        if (!servicio.existsUser(user))
+            throw new RemoteException("el usuario " + user + " no existe");
+        if (!servicio.existsUser(antiguoAmigo))
+            throw new RemoteException("el usuario " + antiguoAmigo + " no existe");
+        if (!usuarios.containsKey(user))
+            throw new RemoteException("el usuario " + user + " no está conectado");
+        
+        if(!servicio.removeAmigo(user, antiguoAmigo))
+            throw new RemoteException("el usuario " + user + "no era amigo de " + antiguoAmigo);
+        if(usuarios.containsKey(antiguoAmigo))
+            notificar(antiguoAmigo, EventoConexion.CLIENTE_DESCONECTADO, user);
     }
 
     // Funciones propias

@@ -1,12 +1,11 @@
 package shared;
 
-import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 
 // ? por qué extiende a Serializable?
-public interface IServidor extends Remote, Serializable {
+public interface IServidor extends Remote {
 
     /**
      * Registra un nuevo usuario al servidor
@@ -66,4 +65,12 @@ public interface IServidor extends Remote, Serializable {
      * @throws RemoteException
      */
     public void cambiarClave(String user, String oldPassword, String newPassword) throws RemoteException;
+
+    /**
+     * 
+     * @param user             Nombre del usuario
+     * @param antiguoAmigo     Nombre del amigo que desea eliminar
+     * @throws RemoteException
+     */
+    public void eliminarAmigo(String user, String antiguoAmigo) throws RemoteException;
 }

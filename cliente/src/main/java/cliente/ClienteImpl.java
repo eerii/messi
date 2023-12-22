@@ -46,6 +46,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     KeyPair keys;
 
     List<IObserver> observadores = new ArrayList<>();
+    List<String> solicitudes = new ArrayList<>();
 
     class Amigue {
         String usuario;
@@ -82,6 +83,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
                 log("error al obtener la llave pública de " + usuario);
                 return;
             }
+
 
             // Generamos el secreto
             try {
@@ -222,7 +224,10 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             }
             case SOLICITUD_AMISTAD: { // String
                 // Añadimos a la interfaz
+                solicitudes.add((String)o);
                 notificarObservadores(EventoConexion.SOLICITUD_AMISTAD, o);
+                log("solicitud de amistad" + o);
+                break;
             }
             case PING: { // String
                 debug("ping de " + o);
@@ -340,6 +345,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     }
 
     public void responderSolicitud(String amigue, boolean respuesta) throws RemoteException {
+        solicitudes.remove(usuario);
         servidor.responderSolicitud(usuario, amigue, respuesta);
     }
 
@@ -374,5 +380,10 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
     public void notificarObservadores(EventoConexion e, Object o) {
         for (IObserver obs : observadores)
             obs.push(e, o);
+    }
+
+    public void pendientes(){
+        solicitudes.forEach(s -> notificarObservadores(EventoConexion.SOLICITUD_AMISTAD, s));
+        solicitudes.clear();
     }
 }

@@ -42,12 +42,12 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
   - Opcional:
     - [x] Grupos Gestionar grupos de amistad.
       - [x] Cada usuario dispone de un grupo de amigos.
-        - [ ] Mecanismo de registro de usuarios
-        - [ ] Solicitud de amistad
+        - [x] Mecanismo de registro de usuarios
+        - [x] Solicitud de amistad
           - [x] Solo si se conoce el nombre del otro usuario
           - [x] El otro usuario debe aceptar para que se complete
             - [x] En ningún caso se notifica si el otro usuario rechaza tu amistad.
-          - [ ] El servidor almacena solicitudes a usuarios desconectados
+          - [x] El servidor almacena solicitudes a usuarios desconectados
       - [x] Las notificaciones de conexión/desconexión solo se producen entre amigos.
       - [x] Los grupos de amistad son distintos entre usuarios
       - [x] El concepto de amistad es biyectivo (si A es amigo de B, B lo es de A)
@@ -59,26 +59,26 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
     - 2,5 puntos:
       - [x] Un servidor aceptando conexiones de múltiples clientes.
       - [x] Hay grupos de amigos definidos de forma estática.
-      - [ ] La clave de acceso al sistema deberá poder ser modificada por el cliente.
+      - [x] La clave de acceso al sistema deberá poder ser modificada por el cliente.
     - 2,5 puntos:
       - [x] Un servidor aceptaando conexiones de múltiples clientes.
-      - [ ] Hay grupos de amigos definidos de forma dinámica.
-        - [ ] Base de datos para usuarios/lista de sus amigos/ clave acceso.
-      - [ ] Mecanismo de registro en la BD de nuevos usuarios.
-        - [ ] Pide el nombre de usuario/contraseña únicamente.
+      - [x] Hay grupos de amigos definidos de forma dinámica.
+        - [x] Base de datos para usuarios/lista de sus amigos/ clave acceso.
+      - [x] Mecanismo de registro en la BD de nuevos usuarios.
+        - [x] Pide el nombre de usuario/contraseña únicamente.
       
     - Transversal:
-      - [ ] Interfaz gráfica del usuario
+      - [x] Interfaz gráfica del usuario
         - [x] Mandar y recibir mensajes
         - [x] Se actualiza cuando hay nuevos usuarios
-        - [ ] Pestaña de registro
+        - [x] Pestaña de registro
         - [x] Múltiples pestañas para los usuarios
-        - [ ] Mecanismo para añadir un nuevo amigo.
+        - [x] Mecanismo para añadir un nuevo amigo.
           - El usuario conoce el nombre de usuario del otro amigo
-          - [ ] Aceptar solicitud de amistad
-        - [ ] Notificación de usuarios en línea
+          - [x] Aceptar solicitud de amistad
+        - [x] Notificación de usuarios en línea
         - [ ] Notificación de mensajes nuevos
-        - [ ] Almacenar claves encriptación cliente
+        - [x] Almacenar claves encriptación cliente
         - [ ] Almacenar conversaciones clientes
         - [ ] Aviso si cambia la clave de encriptación
       - [x] Encriptación p2p
@@ -86,7 +86,15 @@ Con el fin de ejercitar la competencia transversal TR2 descrita en la memoria de
       - [ ] UI con múltiples clientes
       - [ ] Servidor fijo para probar
 
+  - ==Ultimos detalles==
+  - [ ] Funciona entre dos ordenadores distintos
+  - [ ] Encriptar contraseña cliente-servidor
+  - [ ] Arreglar notificacion de mensajes pendientes por leer
+    - Actualmente solo sale la notificación una vez entras al chat donde tenías mensajes pendientes, y ya no se va.
+  - [ ] Si no se se selecciona un chat, que no se vea la barra de enviar mensajes
+
 ### Lista importante
+
 
 (Jorge)
 - Conectar servidor y base de datos
