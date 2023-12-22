@@ -3,12 +3,14 @@ package cliente;
 import java.rmi.RemoteException;
 
 import cliente.ClienteImpl.MensajeDesencriptado;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -58,7 +60,9 @@ public class MessageView implements IObserver {
     @FXML
     public void botonSalir() {
         try {
-            ClienteImpl.get().cerrarSesion();
+            ClienteImpl c = ClienteImpl.get();
+            c.eliminarObservador(this);
+            c.cerrarSesion();
             Utils.changeScene("LoginView.fxml", textoError, this.getClass());
         } catch (Exception e) {
             textoError.setText("Error cerrando sesión: " + e.getMessage());
@@ -119,6 +123,7 @@ public class MessageView implements IObserver {
         VBox cajaContenido = new VBox();
         cajaContenido.setAlignment(esRecibido ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
         cajaContenido.getChildren().addAll(textNombre, textoMensaje);
+        HBox.setHgrow(cajaContenido, Priority.ALWAYS);
 
         HBox cajaMensaje = new HBox();
         cajaMensaje.setSpacing(8.0);
@@ -128,6 +133,6 @@ public class MessageView implements IObserver {
             cajaMensaje.getChildren().addAll(cajaContenido, avatar);
         }
 
-        listaChat.getChildren().add(cajaMensaje);
+        Platform.runLater(() -> listaChat.getChildren().add(cajaMensaje));
     }
 }

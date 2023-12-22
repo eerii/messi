@@ -308,6 +308,10 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         try {
             msg.setUsuario(this.usuario);
 
+            // Añadimos a la interfaz
+            MensajeDesencriptado msg_des = new MensajeDesencriptado(this.usuario, msg.toString(), msg.getHora());
+            notificarObservadores(EventoConexion.MENSAJE_ENVIADO, msg_des);
+
             try {
                 msg.encriptar(amigues.get(usuario).secreto);
             } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
@@ -327,7 +331,6 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
             amigue.mensajes.add(msg);
 
             amigue.conexion.recibir(this.usuario, msg);
-
         } catch (RemoteException e) {
             debug("no se ha podido enviar el mensaje a:" + usuario, Color.ROJO);
         }
@@ -349,7 +352,7 @@ public class ClienteImpl extends UnicastRemoteObject implements ICliente {
         observadores.add(o);
     }
 
-    public void removeObservador(IObserver o) {
+    public void eliminarObservador(IObserver o) {
         observadores.remove(o);
     }
 
