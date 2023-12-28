@@ -19,8 +19,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import shared.EventoConexion;
 import shared.IObserver;
 import shared.Mensaje;
